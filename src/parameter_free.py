@@ -91,6 +91,7 @@ class ParameterFreeAggressive:
 
         all_meta_parameters = []
         for task_iteration, (x, y) in enumerate(zip(x_list, y_list)):
+            task_iteration = task_iteration + 1
             prev_meta_direction = curr_meta_direction
             prev_meta_magnitude_betting_fraction = curr_meta_magnitude_betting_fraction
             prev_meta_magnitude_wealth = curr_meta_magnitude_wealth
@@ -107,6 +108,7 @@ class ParameterFreeAggressive:
             shuffled_indexes = list(range(n_points))
             np.random.shuffle(shuffled_indexes)
             for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
+                inner_iteration = inner_iteration + 1
                 prev_inner_direction = curr_inner_direction
                 prev_inner_magnitude_betting_fraction = curr_inner_magnitude_betting_fraction
                 prev_inner_magnitude_wealth = curr_inner_magnitude_wealth
@@ -198,6 +200,7 @@ class ParameterFreeLazy:
         total_iter = 0
         all_meta_parameters = []
         for task_iteration, (x, y) in enumerate(zip(x_list, y_list)):
+            task_iteration = task_iteration + 1
             prev_meta_direction = curr_meta_direction
             prev_meta_magnitude_betting_fraction = curr_meta_magnitude_betting_fraction
             prev_meta_magnitude_wealth = curr_meta_magnitude_wealth
@@ -219,6 +222,7 @@ class ParameterFreeLazy:
             shuffled_indexes = list(range(n_points))
             np.random.shuffle(shuffled_indexes)
             for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
+                inner_iteration = inner_iteration + 1
                 prev_inner_direction = curr_inner_direction
                 prev_inner_magnitude_betting_fraction = curr_inner_magnitude_betting_fraction
                 prev_inner_magnitude_wealth = curr_inner_magnitude_wealth
@@ -258,7 +262,7 @@ class ParameterFreeLazy:
             total_iter = total_iter + n_points
 
             # compute meta-gradient
-            meta_gradient = np.sum(all_gradients)
+            meta_gradient = np.sum(all_gradients, axis=0)
 
             # define meta step size
             meta_step_size = np.sqrt(2 / (self.lipschitz_constant * self.input_norm_bound * total_iter))
@@ -267,20 +271,16 @@ class ParameterFreeLazy:
             curr_meta_direction = l2_unit_ball_projection(prev_meta_direction - meta_step_size * meta_gradient)
 
             # update meta-magnitude_wealth
-            curr_meta_magnitude_wealth = prev_meta_magnitude_wealth - 1 / (self.input_norm_bound * self.lipschitz_constant) * meta_gradient @ prev_meta_direction * prev_meta_magnitude
+            curr_meta_magnitude_wealth = prev_meta_magnitude_wealth - 1 / (self.input_norm_bound * self.lipschitz_constant * n_points) * meta_gradient @ prev_meta_direction * prev_meta_magnitude
 
             # update meta-magnitude_betting_fraction
-            curr_meta_magnitude_betting_fraction = - (1/total_iter) * ((total_iter - 1) * prev_meta_magnitude_betting_fraction + 1 / (self.lipschitz_constant * self.input_norm_bound) * meta_gradient @ prev_meta_direction)
+            curr_meta_magnitude_betting_fraction = - (1/task_iteration) * ((task_iteration - 1) * prev_meta_magnitude_betting_fraction + 1 / (self.lipschitz_constant * self.input_norm_bound * n_points) * meta_gradient @ prev_meta_direction)
 
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
             self.all_weight_vectors.append(temp_weight_vectors)
         self.all_meta_parameters = all_meta_parameters
-
-    @staticmethod
-    def __general_iteration(t, n, i):
-        return (t - 1) * n + i
 
     @staticmethod
     def predict(x, w):

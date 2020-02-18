@@ -31,8 +31,9 @@ def main():
 
     data = DataHandler(settings)
 
-    model = ParameterFreeFixedBias(np.random.randn(settings.data.n_dims), 1, 1, 1)
+    model = ParameterFreeFixedBias(4 * np.ones(settings.data.n_dims), 1, 1, 1)
     model.fit(data.features_tr[0], data.labels_tr[0])
+    k = 1
 
 
 if __name__ == "__main__":
