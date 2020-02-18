@@ -352,16 +352,24 @@ def subgradient(x, y, w, loss_name=None):
     if loss_name == 'hinge':
         score = x @ w
         if y * score < 1:
-            return -y * x
+            return -y
         else:
             return 0
+    elif loss_name == 'absolute':
+        pred = x @ w
+        if y < pred:
+            return 1
+        elif y >= pred:
+            return -1
     else:
         raise ValueError("Unknown loss.")
 
 
 def loss(x, y, w, loss_name='hinge'):
-    from sklearn.metrics import hinge_loss
-    try:
+    if loss_name == 'hinge':
+        from sklearn.metrics import hinge_loss
         return hinge_loss(y, x @ w)
-    except:
-        k = 1
+    elif loss_name == 'absolute':
+        return 1/len(y) * np.sum(np.abs(y - x @ w))
+    else:
+        raise ValueError("Unknown loss.")
