@@ -1,6 +1,61 @@
 import numpy as np
 
 
+class BasicBias:
+    def __init__(self, fixed_bias):
+        self.fixed_bias = fixed_bias
+        self.step_size_range = [10**i for i in np.linspace(-1, 5, 200)]
+        self.w = None
+
+    def fit(self, x, y):
+        import matplotlib.pyplot as plt
+
+        n_points, n_dims = x.shape
+
+        for step_idx, step_size in enumerate(self.step_size_range):
+            curr_untranslated_weights = np.zeros(n_dims)
+            curr_weights = curr_untranslated_weights + self.fixed_bias
+            all_weight_vectors = []
+            all_losses = []
+            shuffled_indexes = list(range(n_points))
+            np.random.shuffle(shuffled_indexes)
+            for iteration, curr_point_idx in enumerate(shuffled_indexes):
+                prev_untranslated_weights = curr_untranslated_weights
+                prev_weights = curr_weights
+
+                # receive a new datapoint
+                curr_x = x[curr_point_idx, :]
+                curr_y = y[curr_point_idx]
+
+                # compute the gradient
+                subgrad = subgradient(curr_x, curr_y, prev_weights, loss_name='absolute')
+                full_gradient = subgrad * curr_x
+
+                # update weight vector
+                curr_untranslated_weights = prev_untranslated_weights - step_size * full_gradient
+                curr_weights = curr_untranslated_weights + self.fixed_bias
+                all_weight_vectors.append(curr_weights)
+
+                if len(all_weight_vectors) < 2:
+                    final_w = curr_weights
+                else:
+                    final_w = np.mean(all_weight_vectors, axis=0)
+                loss_thing = loss(x, y, final_w, loss_name='absolute')
+                all_losses.append(loss_thing)
+
+            # update the final vector w
+            plt.plot(all_losses)
+            plt.ylim(bottom=0, top=2)
+            plt.pause(0.1)
+            self.w = np.mean(all_weight_vectors, axis=0)
+        plt.show()
+
+    def predict(self, x):
+        w = self.w
+        y_pred = np.sign(x @ w)
+        return y_pred
+
+
 class ParameterFreeFixedBias:
     def __init__(self, fixed_bias, initial_wealth, lipschitz_constant, input_norm_bound):
         self.lipschitz_constant = lipschitz_constant
