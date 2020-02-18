@@ -49,7 +49,7 @@ class DataHandler:
             features = features / norm(features, axis=1, keepdims=True)
 
             # generating and normalizing the weight vectors
-            weight_vector = np.random.normal(loc=4*np.ones(self.settings.data.n_dims), scale=0.5).ravel()
+            weight_vector = np.random.normal(loc=4*np.ones(self.settings.data.n_dims), scale=1).ravel()
             # FIXME
             if task_idx == 0:
                 print(weight_vector)
@@ -64,7 +64,8 @@ class DataHandler:
             # FIXME classification
             # noisy_labels = np.sign(clean_labels + noise_std * standard_noise)
 
-            noisy_labels = np.sign(clean_labels)
+            noisy_labels = clean_labels
+            # noisy_labels = np.sign(clean_labels)
 
             # split into training and test
             tr_indexes, ts_indexes = train_test_split(np.arange(0, self.settings.data.n_all_points), test_size=self.settings.data.ts_points_pct)
