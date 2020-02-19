@@ -1,7 +1,7 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
-from src.parameter_free import ParameterFreeFixedBias, BasicBias, ParameterFreeAggressive, ParameterFreeFixedBiasVariation, ParameterFreeAggressiveVariation, ParameterFreeLazyVariation
-
+from src.indipendent_learning import BasicBias, ParameterFreeFixedBiasVariation, ParameterFreeFixedBias
+from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation
 import argparse
 
 
