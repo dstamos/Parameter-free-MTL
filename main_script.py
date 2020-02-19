@@ -1,6 +1,7 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
-from src.parameter_free import ParameterFreeFixedBias
+from src.parameter_free import ParameterFreeFixedBias, BasicBias, ParameterFreeAggressive, ParameterFreeFixedBiasVariation, ParameterFreeAggressiveVariation, ParameterFreeLazyVariation
+
 import argparse
 
 
@@ -12,12 +13,12 @@ def main():
                         'verbose': 1}
 
     data_settings = {'dataset': 'synthetic',
-                     'n_tr_tasks': 100,
-                     'n_val_tasks': 20,
-                     'n_test_tasks': 50,
-                     'n_all_points': 1000,
+                     'n_tr_tasks': 2,
+                     'n_val_tasks': 2,
+                     'n_test_tasks': 5,
+                     'n_all_points': 500,
                      'ts_points_pct': 0.5,
-                     'n_dims': 5,
+                     'n_dims': 2,
                      'noise_std': 0.1}
 
     training_settings = {'method': 'dynamic-metal_ml',
@@ -31,9 +32,15 @@ def main():
 
     data = DataHandler(settings)
 
-    model = ParameterFreeFixedBias(4 * np.ones(settings.data.n_dims), 1, 1, 1)
+    # model = BasicBias(np.zeros(settings.data.n_dims))
+    # model.fit(data.features_tr[1], data.labels_tr[1])
+
+    model = ParameterFreeFixedBiasVariation(0 * np.ones(settings.data.n_dims), 1, 1, 1)
     model.fit(data.features_tr[0], data.labels_tr[0])
-    k = 1
+
+    # model = ParameterFreeAggressiveVariation(1, 1, 1, 1)
+    # model.fit(data.features_tr, data.labels_tr)
+    # k = 1
 
 
 if __name__ == "__main__":
