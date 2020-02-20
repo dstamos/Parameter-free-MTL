@@ -1,6 +1,6 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
-from src.indipendent_learning import BasicBias, ParameterFreeFixedBiasVariation, ParameterFreeFixedBiasVariation
+from src.indipendent_learning import BasicBias, ParameterFreeFixedBiasVariation
 from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation
 import argparse
 
@@ -13,10 +13,10 @@ def main():
                         'verbose': 1}
 
     data_settings = {'dataset': 'synthetic',
-                     'n_tr_tasks': 2,
-                     'n_val_tasks': 2,
-                     'n_test_tasks': 5,
-                     'n_all_points': 500,
+                     'n_tr_tasks': 150,
+                     'n_val_tasks': 20,
+                     'n_test_tasks': 30,
+                     'n_all_points': 100,
                      'ts_points_pct': 0.5,
                      'n_dims': 2,
                      'noise_std': 0.1}
@@ -35,12 +35,8 @@ def main():
     model = ParameterFreeFixedBiasVariation(np.zeros(settings.data.n_dims))
     model.fit(data, 'test_task_indexes')
 
-    # model = ParameterFreeFixedBias(0 * np.ones(settings.data.n_dims), 1, 1, 1)
-    # model.fit(data.features_tr[0], data.labels_tr[0])
-
-    # model = ParameterFreeAggressiveVariation(1, 1, 1, 1)
-    # model.fit(data.features_tr, data.labels_tr)
-    # k = 1
+    # model = ParameterFreeAggressiveVariation()
+    # model.fit(data)
 
 
 if __name__ == "__main__":

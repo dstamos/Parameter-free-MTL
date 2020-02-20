@@ -31,6 +31,6 @@ def loss(x, y, w, loss_name='hinge'):
         if hasattr(y, '__len__'):
             return 1 / len(y) * np.sum(np.abs(y - x @ w))
         else:
-            return 1 / len(y) * np.sum(np.abs(y - x @ w))
+            return np.abs(y - x @ w)
     else:
         raise ValueError("Unknown loss.")

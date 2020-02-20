@@ -74,7 +74,7 @@ class ParameterFreeFixedBiasVariation:
 
     def fit(self, data, task_indexes):
 
-        performance = []
+        performances = []
         for task_idx, task in enumerate(getattr(data, task_indexes)):
             x = data.features_tr[task]
             y = data.labels_tr[task]
@@ -87,8 +87,6 @@ class ParameterFreeFixedBiasVariation:
             for idx, value_shit in enumerate(range_shit):
                 curr_bet_fraction = self.magnitude_betting_fraction
 
-                from copy import deepcopy
-                initial_shit = deepcopy(value_shit)
 
                 curr_wealth = value_shit   # self.magnitude_wealth
                 curr_magnitude = curr_bet_fraction * curr_wealth
@@ -147,17 +145,15 @@ class ParameterFreeFixedBiasVariation:
                     loss_thing = loss(x, y, final_w, loss_name='absolute')
                     all_losses.append(loss_thing)
 
-                print('initial wealth %5f | error %5.2f' % (initial_shit, loss_thing))
-                print('')
-                plt.plot(all_losses)
-                plt.ylim(bottom=0, top=1)
-                plt.pause(0.1)
-                # update the final vector w
-                self.w = np.mean(all_weight_vectors, axis=0)
-                print(self.w)
+                # print('initial wealth %5f | error %5.2f' % (initial_shit, loss_thing))
+                # print('')
+                # plt.plot(all_losses)
+                # plt.ylim(bottom=0, top=1)
+                # plt.pause(0.1)
                 curr_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
                 if curr_perf < best_perf:
                     best_perf = curr_perf
-            performance.append(best_perf)
-            print(performance)
-        plt.show()
+            performances.append(best_perf)
+            # print(performances)
+            print('test: %2d (%2d) | test perf: %5.3f' % (task_idx, task, np.mean(performances)))
+        return np.mean(performances)
