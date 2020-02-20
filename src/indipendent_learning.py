@@ -64,13 +64,14 @@ class BasicBias:
 
 
 class ParameterFreeFixedBiasVariation:
-    def __init__(self, fixed_bias, initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
+    def __init__(self, fixed_bias, initial_wealth=1, lipschitz_constant=1, input_norm_bound=1, verbose=0):
         self.L = lipschitz_constant
         self.R = input_norm_bound
         self.fixed_bias = fixed_bias
         self.w = None
         self.magnitude_betting_fraction = 0
         self.magnitude_wealth = initial_wealth
+        self.verbose = verbose
 
     def fit(self, data, task_indexes):
 
@@ -83,10 +84,10 @@ class ParameterFreeFixedBiasVariation:
             best_perf = np.Inf
             # range_shit = [10**i for i in np.linspace(-6, 6, 100)]
             # range_shit = np.linspace(0.1, n_points, 20)
+            # range_shit = [np.sqrt(n_points)]
             range_shit = [np.sqrt(n_points)]
             for idx, value_shit in enumerate(range_shit):
                 curr_bet_fraction = self.magnitude_betting_fraction
-
 
                 curr_wealth = value_shit   # self.magnitude_wealth
                 curr_magnitude = curr_bet_fraction * curr_wealth
@@ -155,5 +156,6 @@ class ParameterFreeFixedBiasVariation:
                     best_perf = curr_perf
             performances.append(best_perf)
             # print(performances)
-            print('test: %2d (%2d) | test perf: %5.3f' % (task_idx, task, np.mean(performances)))
+            if self.verbose !=0:
+                print('test: %2d (%2d) | test perf: %5.3f' % (task_idx, task, np.mean(performances)))
         return np.mean(performances)

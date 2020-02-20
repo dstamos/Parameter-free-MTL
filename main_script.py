@@ -15,7 +15,7 @@ def main():
     data_settings = {'dataset': 'synthetic',
                      'n_tr_tasks': 150,
                      'n_val_tasks': 20,
-                     'n_test_tasks': 30,
+                     'n_test_tasks': 50,
                      'n_all_points': 100,
                      'ts_points_pct': 0.5,
                      'n_dims': 2,
@@ -32,11 +32,11 @@ def main():
 
     data = DataHandler(settings)
 
-    model = ParameterFreeFixedBiasVariation(np.zeros(settings.data.n_dims))
-    model.fit(data, 'test_task_indexes')
+    # model = ParameterFreeFixedBiasVariation(np.zeros(settings.data.n_dims), verbose=1)
+    # model.fit(data, 'test_task_indexes')
 
-    # model = ParameterFreeAggressiveVariation()
-    # model.fit(data)
+    model = ParameterFreeAggressiveVariation()
+    model.fit(data)
 
 
 if __name__ == "__main__":
