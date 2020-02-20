@@ -1,6 +1,6 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
-from src.indipendent_learning import BasicBias, ParameterFreeFixedBiasVariation, ParameterFreeFixedBias
+from src.indipendent_learning import BasicBias, ParameterFreeFixedBiasVariation, ParameterFreeFixedBiasVariation
 from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation
 import argparse
 
@@ -32,11 +32,11 @@ def main():
 
     data = DataHandler(settings)
 
-    # model = BasicBias(np.zeros(settings.data.n_dims))
-    # model.fit(data.features_tr[1], data.labels_tr[1])
+    model = ParameterFreeFixedBiasVariation(np.zeros(settings.data.n_dims))
+    model.fit(data, 'test_task_indexes')
 
-    model = ParameterFreeFixedBiasVariation(0 * np.ones(settings.data.n_dims), 1, 1, 1)
-    model.fit(data.features_tr[0], data.labels_tr[0])
+    # model = ParameterFreeFixedBias(0 * np.ones(settings.data.n_dims), 1, 1, 1)
+    # model.fit(data.features_tr[0], data.labels_tr[0])
 
     # model = ParameterFreeAggressiveVariation(1, 1, 1, 1)
     # model.fit(data.features_tr, data.labels_tr)
