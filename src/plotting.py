@@ -11,10 +11,6 @@ def plot_stuff(indi, oracle, aggressive, plot_type='cumulative_errors', lazy=Non
     oracle_mean = np.mean(oracle, axis=0)
     oracle_std = np.std(oracle, axis=0)
 
-    if plot_type == 'cumulative_errors':
-        lazy_mean = np.mean(lazy, axis=0)
-        lazy_std = np.std(lazy, axis=0)
-
     aggro_mean = np.mean(aggressive, axis=0)
     aggro_std = np.std(aggressive, axis=0)
 
@@ -23,8 +19,7 @@ def plot_stuff(indi, oracle, aggressive, plot_type='cumulative_errors', lazy=Non
 
     plt.plot(indi_mean, color='k', linestyle='-', linewidth=2, label='ITL')
     plt.plot(oracle_mean, color='darkgreen', linestyle='--', linewidth=2, label='Oracle')
-    if plot_type == 'cumulative_errors':
-        plt.plot(lazy_mean, color='tab:blue', linewidth=2, label='Lazy')
+
     plt.plot(aggro_mean, color='tab:red', linewidth=2, label='Aggressive')
     plt.ylim(bottom=2, top=12)
 
@@ -34,12 +29,15 @@ def plot_stuff(indi, oracle, aggressive, plot_type='cumulative_errors', lazy=Non
     plt.fill_between(range(len(oracle_mean)), oracle_mean - oracle_std, oracle_mean + oracle_std,
                      alpha=0.1, edgecolor='darkgreen', facecolor='darkgreen', antialiased=True)
 
-    if plot_type == 'cumulative_errors':
-        plt.fill_between(range(len(lazy_mean)), lazy_mean - lazy_std, lazy_mean + lazy_std,
-                         alpha=0.1, edgecolor='tab:blue', facecolor='tab:blue', antialiased=True)
-
     plt.fill_between(range(len(aggro_mean)), aggro_mean - aggro_std, aggro_mean + aggro_std,
                      alpha=0.1, edgecolor='tab:red', facecolor='tab:red', antialiased=True)
+
+    if plot_type == 'cumulative_errors':
+        lazy_mean = np.mean(lazy, axis=0)
+        lazy_std = np.std(lazy, axis=0)
+
+        plt.plot(lazy_mean, color='tab:blue', linewidth=2, label='Lazy')
+        plt.fill_between(range(len(lazy_mean)), lazy_mean - lazy_std, lazy_mean + lazy_std, alpha=0.1, edgecolor='tab:blue', facecolor='tab:blue', antialiased=True)
 
     plt.legend()
     if plot_type == 'cumulative_errors':
