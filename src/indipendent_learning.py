@@ -140,6 +140,6 @@ class ParameterFreeFixedBiasVariation:
 
                 curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
 
-            all_mtl_performances.append(curr_test_perf)
+                all_mtl_performances.append(curr_test_perf)
 
         return (task_idx + 1) * [np.nanmean(all_mtl_performances)], n_points * (task_idx + 1) * [np.nanmean(all_errors)]

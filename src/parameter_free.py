@@ -160,12 +160,8 @@ class ParameterFreeLazyVariation:
         curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
         all_h_meta = []
-        all_losses = []
-        all_errors = []
-        total_sum = 0
-        temp_iter = 0
-        manual_rolling_average = []
-        all_test_performances = []
+        all_individual_cum_errors = []
+        best_mtl_performances = []
 
         total_iter = 0
         all_meta_parameters = []
@@ -212,9 +208,9 @@ class ParameterFreeLazyVariation:
                 curr_y = y[curr_point_idx]
 
                 if len(temp_weight_vectors) > 1:
-                    all_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
+                    all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
                 else:
-                    all_errors.append(np.nan)
+                    all_individual_cum_errors.append(np.nan)
 
                 # compute the gradient
                 subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
@@ -233,19 +229,12 @@ class ParameterFreeLazyVariation:
                 # update magnitude_betting_fraction
                 h_inner = (1 / (self.R * self.L)) * full_gradient @ prev_inner_direction * (1 / (1 - (1 / (self.R * self.L)) * full_gradient @ prev_inner_direction * prev_inner_magnitude_betting_fraction))
                 all_h_inner.append(h_inner)
-                A_thing_inner = 1 + np.sum([curr_h ** 2 for curr_h in all_h_inner])
+                a_thing_inner = 1 + np.sum([curr_h ** 2 for curr_h in all_h_inner])
 
-                curr_inner_magnitude_betting_fraction = np.max([np.min([prev_inner_magnitude_betting_fraction - (2 / (2 - np.log(3))) * (h_inner / A_thing_inner), 1 / 2]), -1 / 2])
+                curr_inner_magnitude_betting_fraction = np.max([np.min([prev_inner_magnitude_betting_fraction - (2 / (2 - np.log(3))) * (h_inner / a_thing_inner), 1 / 2]), -1 / 2])
 
                 # update magnitude
                 curr_inner_magnitude = curr_inner_magnitude_betting_fraction * curr_inner_magnitude_wealth
-
-                loss_thing = loss(curr_x, curr_y, np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-                all_losses.append(loss_thing)
-
-                total_sum = total_sum + loss_thing
-                temp_iter = temp_iter + 1
-                manual_rolling_average.append(total_sum / temp_iter)
 
             # define total iteration
             total_iter = total_iter + n_points
@@ -265,37 +254,15 @@ class ParameterFreeLazyVariation:
             # update meta-magnitude_betting_fraction
             h_meta = (1 / (self.R * self.L * n_points)) * (meta_gradient @ prev_meta_direction) * (1 / (1 - (1 / (self.R * self.L * n_points)) * (meta_gradient @ prev_meta_direction) * prev_meta_magnitude_betting_fraction))
             all_h_meta.append(h_meta)
-            A_thing_meta = 1 + np.sum([curr_h ** 2 for curr_h in all_h_meta])
+            a_thing_meta = 1 + np.sum([curr_h ** 2 for curr_h in all_h_meta])
 
-            curr_meta_magnitude_betting_fraction = np.max([np.min([prev_meta_magnitude_betting_fraction - (2 / (2 - np.log(3))) * (h_meta / A_thing_meta), 1/2]), -1/2])
+            curr_meta_magnitude_betting_fraction = np.max([np.min([prev_meta_magnitude_betting_fraction - (2 / (2 - np.log(3))) * (h_meta / a_thing_meta), 1/2]), -1/2])
 
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
             curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-            all_test_performances.append(curr_test_perf)
-
-            # plt.plot(all_test_performances)
-            # plt.ylim(bottom=0, top=4)
-            # plt.pause(0.1)
-
-            # print('test: %2d (%2d) | val perf: %5.3f | test perf: %5.3f' % (task_iteration, task, np.Inf, curr_test_perf))
-
-            # plt.plot(all_test_performances)
-            # plt.ylim(bottom=0, top=2)
-            # plt.pause(0.1)
-        import pandas as pd
-        # plt.plot(pd.DataFrame(all_errors).rolling(window=10 ** 10, min_periods=1).mean(), 'tab:blue')
-        # plt.pause(0.01)
+            best_mtl_performances.append(curr_test_perf)
 
         self.all_meta_parameters = all_meta_parameters
-        return pd.DataFrame(all_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
-
-    @staticmethod
-    def predict(x, w):
-        # w = self.w
-        y_pred = np.sign(x @ w)
-        return y_pred
-
-
-
+        return pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()

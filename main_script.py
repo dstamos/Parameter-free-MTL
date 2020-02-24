@@ -14,9 +14,12 @@ def main():
     matplotlib.rc('font', **font)
 
     all_accumulative_errors_indi = []
+    all_mtl_errors_indi = []
     all_accumulative_errors_oracle = []
+    all_mtl_errors_oracle = []
     all_errors_lazy = []
     all_accumulative_errors_aggressive = []
+    all_mtl_errors_aggressive = []
 
     tt = time.time()
     for seed in range(3):
@@ -45,24 +48,28 @@ def main():
         data = DataHandler(settings)
 
         model = ParameterFreeFixedBiasVariation(np.zeros(data.oracle.shape), verbose=1)
-        _, accumulative_errors_indi = model.fit(data, 'tr_task_indexes')
+        mtl_errors_indi, accumulative_errors_indi = model.fit(data, 'tr_task_indexes')
         all_accumulative_errors_indi.append(accumulative_errors_indi)
+        all_mtl_errors_indi.append(mtl_errors_indi)
 
         model = ParameterFreeFixedBiasVariation(data.oracle, verbose=1)
-        _, accumulative_errors_oracle = model.fit(data, 'tr_task_indexes')
+        mtl_errors_oracle, accumulative_errors_oracle = model.fit(data, 'tr_task_indexes')
         all_accumulative_errors_oracle.append(accumulative_errors_oracle)
+        all_mtl_errors_oracle.append(mtl_errors_oracle)
 
         model = ParameterFreeLazyVariation()
         errors_lazy = model.fit(data)
         all_errors_lazy.append(errors_lazy)
 
         model = ParameterFreeAggressiveVariation()
-        _, cumulative_errors_aggressive = model.fit(data)
+        mtl_errors_aggressive, cumulative_errors_aggressive = model.fit(data)
         all_accumulative_errors_aggressive.append(cumulative_errors_aggressive)
+        all_mtl_errors_aggressive.append(mtl_errors_aggressive)
 
         print('seed: %d | %5.2f sec' % (seed, time.time() - tt))
 
-    plot_stuff(all_accumulative_errors_indi, all_errors_lazy, all_accumulative_errors_aggressive, oracle=all_accumulative_errors_oracle, plot_type='cumulative_errors')
+    plot_stuff(all_accumulative_errors_indi, all_accumulative_errors_oracle, all_accumulative_errors_aggressive, lazy=all_errors_lazy, plot_type='cumulative_errors')
+    plot_stuff(all_mtl_errors_indi, all_mtl_errors_oracle, all_mtl_errors_aggressive, plot_type='mtl_errors')
 
     exit()
 
