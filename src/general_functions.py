@@ -24,9 +24,16 @@ def subgradient(x, y, w, loss_name=None):
 
 def loss(x, y, w, loss_name='hinge'):
     if loss_name == 'hinge':
-        from sklearn.metrics import hinge_loss
-        loss_thing = hinge_loss(y, x @ w)
-        return loss_thing
+        # from sklearn.metrics import hinge_loss
+        # if hasattr(y, '__len__'):
+        #     return 1 / len(y) * hinge_loss(y, x @ w)
+        # else:
+        #     return hinge_loss([y], x.reshape(1, -1) @ w)
+
+        if hasattr(y, '__len__'):
+            return (1 / len(y)) * np.sum(np.maximum(0, 1 - y * (x @ w)))
+        else:
+            return np.maximum(0, 1 - y * (x @ w))
     elif loss_name == 'absolute':
         if hasattr(y, '__len__'):
             return 1 / len(y) * np.sum(np.abs(y - x @ w))
