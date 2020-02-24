@@ -1,6 +1,6 @@
 import numpy as np
+import pandas as pd
 from src.general_functions import l2_unit_ball_projection, subgradient, loss
-import matplotlib.pyplot as plt
 
 
 class ParameterFreeAggressiveVariation:
@@ -15,27 +15,24 @@ class ParameterFreeAggressiveVariation:
         self.inner_magnitude_wealth = inner_initial_wealth
 
     def fit(self, data):
-        range_shit_meta = np.linspace(0.1, 1000, 50)
-        range_shit_inner = np.linspace(0.1, 1000, 50)
-        # range_shit = np.linspace(0.1, n_points * len(x_list), 30)
-        # range_shit = [1000]
+        # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 20)
+        # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
+        range_shit_meta = [100]
+        range_shit_inner = [100]
 
-        best_val_perf = np.Inf
-        best_test_perf = np.Inf
-        for idx, value_shit_meta in enumerate(range_shit_meta):
-            for idx, value_shit_inner in enumerate(range_shit_inner):
-                print(value_shit_meta, value_shit_inner)
+        best_cumsum_perf = np.Inf
+        for _, value_shit_meta in enumerate(range_shit_meta):
+            for _, value_shit_inner in enumerate(range_shit_inner):
+                all_individual_cum_errors = []
+
                 curr_meta_fraction = self.meta_magnitude_betting_fraction
                 curr_meta_wealth = value_shit_meta  # self.meta_magnitude_wealth
                 curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
                 curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
-                all_losses = []
                 all_h_meta = []
-                manual_rolling_average = []
-                total_sum = 0
+                all_mtl_performances = []
                 all_meta_parameters = []
-                all_performances = []
                 for task_iteration, task in enumerate(data.tr_task_indexes):
                     x = data.features_tr[task]
                     y = data.labels_tr[task]
@@ -80,6 +77,11 @@ class ParameterFreeAggressiveVariation:
                         curr_x = x[curr_point_idx, :]
                         curr_y = y[curr_point_idx]
 
+                        if len(temp_weight_vectors) > 1:
+                            all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
+                        else:
+                            all_individual_cum_errors.append(np.nan)
+
                         # compute the gradient
                         subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
                         full_gradient = subgrad * curr_x
@@ -102,10 +104,10 @@ class ParameterFreeAggressiveVariation:
                         # meta h thing
                         h_meta = (1 / (self.R * self.L)) * (full_gradient @ prev_meta_direction) * (1 / (1 - (1 / (self.R * self.L)) * (full_gradient @ prev_meta_direction) * prev_meta_fraction))
                         all_h_meta.append(h_meta)
-                        A_thing_meta = 1 + np.sum([curr_h ** 2 for curr_h in all_h_meta])
+                        a_thing_meta = 1 + np.sum([curr_h ** 2 for curr_h in all_h_meta])
 
                         # update meta-magnitude_betting_fraction
-                        curr_meta_fraction = np.max([np.min([prev_meta_fraction - (2 / (2 - np.log(3))) * (h_meta / A_thing_meta), 1 / 2]), -1 / 2])
+                        curr_meta_fraction = np.max([np.min([prev_meta_fraction - (2 / (2 - np.log(3))) * (h_meta / a_thing_meta), 1 / 2]), -1 / 2])
 
                         # update meta-magnitude
                         curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
@@ -116,47 +118,24 @@ class ParameterFreeAggressiveVariation:
                         # update magnitude_betting_fraction
                         h_inner = (1 / (self.R * self.L)) * full_gradient @ prev_inner_direction * (1 / (1 - (1 / (self.R * self.L)) * full_gradient @ prev_inner_direction * prev_inner_fraction))
                         all_h_inner.append(h_inner)
-                        A_thing_inner = 1 + np.sum([curr_h**2 for curr_h in all_h_inner])
+                        a_thing_inner = 1 + np.sum([curr_h**2 for curr_h in all_h_inner])
                         # update magnitude_betting_fraction
-                        curr_inner_fraction = np.max([np.min([prev_inner_fraction - (2 / (2 - np.log(3))) * (h_inner / A_thing_inner), 1/2]), -1/2])
+                        curr_inner_fraction = np.max([np.min([prev_inner_fraction - (2 / (2 - np.log(3))) * (h_inner / a_thing_inner), 1/2]), -1/2])
 
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
 
-                        loss_thing = loss(curr_x, curr_y, np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-                        all_losses.append(loss_thing)
+                    curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
+                    all_mtl_performances.append(curr_test_perf)
 
-                        total_sum = total_sum + loss_thing
-                        manual_rolling_average.append(total_sum / total_iter)
-                    plt.plot(manual_rolling_average)
-                    plt.ylim(bottom=0, top=4)
-                    plt.title([str(value_shit_meta) + ' ' + str(value_shit_inner)])
-                    plt.pause(0.1)
-
-                    # curr_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
-                    # if curr_perf < best_perf:
-                    #     best_perf = curr_perf
-
-                    from src.indipendent_learning import ParameterFreeFixedBiasVariation
-                    all_meta_parameters.append(meta_parameter)
-                    model = ParameterFreeFixedBiasVariation(np.mean(all_meta_parameters, axis=0))
-                    curr_val_perf = model.fit(data, 'val_task_indexes')
-
-                    if curr_val_perf < best_val_perf:
-                        best_val_perf = curr_val_perf
-
-                    all_performances.append(best_val_perf)
-
-                    model = ParameterFreeFixedBiasVariation(np.mean(all_meta_parameters, axis=0))
-                    curr_test_perf = model.fit(data, 'test_task_indexes')
-
-                    if curr_test_perf < best_test_perf:
-                        best_test_perf = curr_test_perf
-
-                    print('test: %2d (%2d) | val perf: %5.3f | test perf: %5.3f' % (task_iteration, task, best_val_perf, best_test_perf))
-
-                # self.all_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
-            # self.all_meta_parameters = all_meta_parameters
+                if np.nanmean(all_individual_cum_errors) < best_cumsum_perf:
+                    best_cumsum_perf = np.nanmean(all_individual_cum_errors)
+                    best_cumsum_performances = all_individual_cum_errors
+                    best_mtl_performances = all_mtl_performances
+                    print('best inner: %f | best meta: %f | error: %f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                else:
+                    print('curr inner: %f | curr meta: %f | error: %f ---' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+        return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
     def __general_iteration(t, n, i):
@@ -164,7 +143,7 @@ class ParameterFreeAggressiveVariation:
 
 
 class ParameterFreeLazyVariation:
-    def __init__(self, meta_initial_wealth, inner_initial_wealth, lipschitz_constant, input_norm_bound):
+    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
         self.L = lipschitz_constant
         self.R = input_norm_bound
         self.all_weight_vectors = None
@@ -174,22 +153,26 @@ class ParameterFreeLazyVariation:
         self.inner_magnitude_betting_fraction = 0
         self.inner_magnitude_wealth = inner_initial_wealth
 
-    def fit(self, x_list, y_list):
-        n_dims = x_list[0].shape[1]
+    def fit(self, data):
         curr_meta_magnitude_betting_fraction = self.meta_magnitude_betting_fraction
         curr_meta_magnitude_wealth = self.meta_magnitude_wealth
         curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
-        curr_meta_direction = np.zeros(n_dims)
+        curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
         all_h_meta = []
         all_losses = []
+        all_errors = []
         total_sum = 0
         temp_iter = 0
         manual_rolling_average = []
+        all_test_performances = []
 
         total_iter = 0
         all_meta_parameters = []
-        for task_iteration, (x, y) in enumerate(zip(x_list, y_list)):
+        for task_iteration, task in enumerate(data.tr_task_indexes):
+            x = data.features_tr[task]
+            y = data.labels_tr[task]
+
             task_iteration = task_iteration + 1
             prev_meta_direction = curr_meta_direction
             prev_meta_magnitude_betting_fraction = curr_meta_magnitude_betting_fraction
@@ -205,7 +188,7 @@ class ParameterFreeLazyVariation:
             curr_inner_magnitude_betting_fraction = self.inner_magnitude_betting_fraction
             curr_inner_magnitude_wealth = self.inner_magnitude_wealth
             curr_inner_magnitude = curr_inner_magnitude_betting_fraction * curr_inner_magnitude_wealth
-            curr_inner_direction = np.zeros(n_dims)
+            curr_inner_direction = np.zeros(x.shape[1])
 
             all_h_inner = []
 
@@ -227,6 +210,11 @@ class ParameterFreeLazyVariation:
                 # receive a new datapoint
                 curr_x = x[curr_point_idx, :]
                 curr_y = y[curr_point_idx]
+
+                if len(temp_weight_vectors) > 1:
+                    all_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
+                else:
+                    all_errors.append(np.nan)
 
                 # compute the gradient
                 subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
@@ -284,11 +272,24 @@ class ParameterFreeLazyVariation:
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
-            plt.plot(manual_rolling_average)
-            plt.ylim(bottom=0, top=2)
-            plt.pause(0.1)
+            curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
+            all_test_performances.append(curr_test_perf)
+
+            # plt.plot(all_test_performances)
+            # plt.ylim(bottom=0, top=4)
+            # plt.pause(0.1)
+
+            # print('test: %2d (%2d) | val perf: %5.3f | test perf: %5.3f' % (task_iteration, task, np.Inf, curr_test_perf))
+
+            # plt.plot(all_test_performances)
+            # plt.ylim(bottom=0, top=2)
+            # plt.pause(0.1)
+        import pandas as pd
+        # plt.plot(pd.DataFrame(all_errors).rolling(window=10 ** 10, min_periods=1).mean(), 'tab:blue')
+        # plt.pause(0.01)
 
         self.all_meta_parameters = all_meta_parameters
+        return pd.DataFrame(all_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
     def predict(x, w):

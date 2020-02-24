@@ -1,6 +1,9 @@
 backup
+plots
 miniimagenet
 omniglot
 .idea
 __pycache__
 *.zip
+*.png
+*.pdf

@@ -45,13 +45,14 @@ class DataHandler:
             raise ValueError('Invalid dataset')
 
     def synthetic_regression_data_gen(self):
+        self.oracle = 10 * np.ones(self.settings.data.n_dims)
         for task_idx in range(self.settings.data.n_all_tasks):
             # generating and normalizing the inputs
             features = np.random.randn(self.settings.data.n_all_points, self.settings.data.n_dims)
             features = features / norm(features, axis=1, keepdims=True)
 
             # generating and normalizing the weight vectors
-            weight_vector = np.random.normal(loc=10*np.ones(self.settings.data.n_dims), scale=1).ravel()
+            weight_vector = self.oracle + np.random.normal(loc=np.zeros(self.settings.data.n_dims), scale=1).ravel()
 
             # generating labels and adding noise
             clean_labels = features @ weight_vector

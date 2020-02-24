@@ -1,6 +1,5 @@
 import numpy as np
 from src.general_functions import l2_unit_ball_projection, subgradient, loss
-import matplotlib.pyplot as plt
 
 
 class BasicBias:
@@ -49,18 +48,12 @@ class BasicBias:
                     loss_thing = loss(x, y, final_w, loss_name='absolute')
                     all_losses.append(loss_thing)
 
-                # update the final vector w
-                plt.plot(all_losses)
-                plt.ylim(bottom=0, top=1)
-                plt.pause(0.1)
-
                 curr_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
                 if curr_perf < best_perf:
                     best_perf = curr_perf
                     best_step = step_size
             performance.append(best_perf)
             print(performance)
-        plt.show()
 
 
 class ParameterFreeFixedBiasVariation:
@@ -75,27 +68,23 @@ class ParameterFreeFixedBiasVariation:
 
     def fit(self, data, task_indexes):
 
-        performances = []
+        all_mtl_performances = []
+        all_errors = []
         for task_idx, task in enumerate(getattr(data, task_indexes)):
             x = data.features_tr[task]
             y = data.labels_tr[task]
             n_points, n_dims = x.shape
 
-            best_perf = np.Inf
-            # range_shit = [10**i for i in np.linspace(-6, 6, 100)]
             # range_shit = np.linspace(0.1, n_points, 20)
-            # range_shit = [np.sqrt(n_points)]
-            range_shit = [np.sqrt(n_points)]
+            range_shit = [1]
             for idx, value_shit in enumerate(range_shit):
                 curr_bet_fraction = self.magnitude_betting_fraction
 
                 curr_wealth = value_shit   # self.magnitude_wealth
                 curr_magnitude = curr_bet_fraction * curr_wealth
-                curr_direction = np.zeros(n_dims)
+                curr_direction = np.random.randn(n_dims)
 
-                all_losses = []
                 all_weight_vectors = []
-
                 all_h = []
 
                 shuffled_indexes = list(range(n_points))
@@ -115,6 +104,11 @@ class ParameterFreeFixedBiasVariation:
                     curr_x = x[curr_point_idx, :]
                     curr_y = y[curr_point_idx]
 
+                    if iteration > 2:
+                        all_errors.append(loss(curr_x, curr_y, all_weight_vectors[-2], loss_name='absolute'))
+                    else:
+                        all_errors.append(np.nan)
+
                     # compute the gradient
                     subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
                     full_gradient = subgrad * curr_x
@@ -129,12 +123,12 @@ class ParameterFreeFixedBiasVariation:
                     curr_wealth = prev_wealth - (1 / (self.R * self.L)) * full_gradient @ prev_direction * prev_magnitude
 
                     # h_thing
-                    h = (1 / (self.R * self.L)) * full_gradient @ prev_direction * (1 / (1 - (1 / (self.R * self.L)) * full_gradient @ prev_direction * prev_bet_fraction))
+                    h = (1 / (self.R * self.L)) * full_gradient @ prev_direction * (1 / (1 - (1 / (self.R * self.L)) * (full_gradient @ prev_direction) * prev_bet_fraction))
                     all_h.append(h)
-                    A_thing = 1 + np.sum([curr_h**2 for curr_h in all_h])
+                    a_thing = 1 + np.sum([curr_h**2 for curr_h in all_h])
 
                     # update magnitude_betting_fraction
-                    curr_bet_fraction = np.max([np.min([prev_bet_fraction - (2 / (2 - np.log(3))) * (h / A_thing), 1/2]), -1/2])
+                    curr_bet_fraction = np.max([np.min([prev_bet_fraction - (2 / (2 - np.log(3))) * (h / a_thing), 1/2]), -1/2])
 
                     # update magnitude
                     curr_magnitude = curr_bet_fraction * curr_wealth
@@ -143,19 +137,9 @@ class ParameterFreeFixedBiasVariation:
                         final_w = weight_vector
                     else:
                         final_w = np.mean(all_weight_vectors, axis=0)
-                    loss_thing = loss(x, y, final_w, loss_name='absolute')
-                    all_losses.append(loss_thing)
 
-                # print('initial wealth %5f | error %5.2f' % (initial_shit, loss_thing))
-                # print('')
-                # plt.plot(all_losses)
-                # plt.ylim(bottom=0, top=1)
-                # plt.pause(0.1)
-                curr_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
-                if curr_perf < best_perf:
-                    best_perf = curr_perf
-            performances.append(best_perf)
-            # print(performances)
-            if self.verbose !=0:
-                print('test: %2d (%2d) | test perf: %5.3f' % (task_idx, task, np.mean(performances)))
-        return np.mean(performances)
+                curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], final_w, loss_name='absolute')
+
+            all_mtl_performances.append(curr_test_perf)
+
+        return (task_idx + 1) * [np.nanmean(all_mtl_performances)], n_points * (task_idx + 1) * [np.nanmean(all_errors)]
