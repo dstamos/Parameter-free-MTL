@@ -271,6 +271,124 @@ class ParameterFreeAggressiveVariation:
         return (t - 1) * n + i
 
 
+class ParameterFreeLazyClassic:
+    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
+        self.L = lipschitz_constant
+        self.R = input_norm_bound
+        self.all_weight_vectors = None
+        self.all_meta_parameters = None
+        self.meta_magnitude_betting_fraction = 0
+        self.meta_magnitude_wealth = meta_initial_wealth
+        self.inner_magnitude_betting_fraction = 0
+        self.inner_magnitude_wealth = inner_initial_wealth
+
+    def fit(self, data):
+        curr_meta_magnitude_betting_fraction = self.meta_magnitude_betting_fraction
+        curr_meta_magnitude_wealth = self.meta_magnitude_wealth
+        curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
+        curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
+
+        all_h_meta = []
+        all_individual_cum_errors = []
+        best_mtl_performances = []
+
+        total_iter = 0
+        all_meta_parameters = []
+        for task_iteration, task in enumerate(data.tr_task_indexes):
+            x = data.features_tr[task]
+            y = data.labels_tr[task]
+
+            task_iteration = task_iteration + 1
+            prev_meta_direction = curr_meta_direction
+            prev_meta_magnitude_betting_fraction = curr_meta_magnitude_betting_fraction
+            prev_meta_magnitude_wealth = curr_meta_magnitude_wealth
+            prev_meta_magnitude = curr_meta_magnitude
+
+            # update meta-parameter
+            meta_parameter = prev_meta_magnitude * prev_meta_direction
+            all_meta_parameters.append(meta_parameter)
+
+            # initialize the inner parameters
+            n_points, n_dims = x.shape
+            curr_inner_magnitude_betting_fraction = self.inner_magnitude_betting_fraction
+            curr_inner_magnitude_wealth = self.inner_magnitude_wealth
+            curr_inner_magnitude = curr_inner_magnitude_betting_fraction * curr_inner_magnitude_wealth
+            curr_inner_direction = np.zeros(x.shape[1])
+
+            all_h_inner = []
+
+            temp_weight_vectors = []
+            all_gradients = []
+            shuffled_indexes = list(range(n_points))
+            np.random.shuffle(shuffled_indexes)
+            for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
+                inner_iteration = inner_iteration + 1
+                prev_inner_direction = curr_inner_direction
+                prev_inner_magnitude_betting_fraction = curr_inner_magnitude_betting_fraction
+                prev_inner_magnitude_wealth = curr_inner_magnitude_wealth
+                prev_inner_magnitude = curr_inner_magnitude
+
+                # update inner weight vector
+                weight_vector = prev_inner_magnitude * prev_inner_direction + meta_parameter
+                temp_weight_vectors.append(weight_vector)
+
+                # receive a new datapoint
+                curr_x = x[curr_point_idx, :]
+                curr_y = y[curr_point_idx]
+
+                if len(temp_weight_vectors) > 1:
+                    all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
+                else:
+                    all_individual_cum_errors.append(np.nan)
+
+                # compute the gradient
+                subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
+                full_gradient = subgrad * curr_x
+                all_gradients.append(full_gradient)
+
+                # define inner step size
+                inner_step_size = (1 / (self.L * self.R)) * np.sqrt(2 / inner_iteration)
+
+                # update inner direction
+                curr_inner_direction = l2_unit_ball_projection(prev_inner_direction - inner_step_size * full_gradient)
+
+                # update inner magnitude_wealth
+                curr_inner_magnitude_wealth = prev_inner_magnitude_wealth - 1 / (self.R * self.L) * full_gradient @ prev_inner_direction * prev_inner_magnitude
+
+                # update magnitude_betting_fraction
+                curr_inner_magnitude_betting_fraction = -(1/inner_iteration) * ((inner_iteration-1) * prev_inner_magnitude_betting_fraction + (1/(self.L*self.R))*(full_gradient @ prev_inner_direction))
+
+                # update magnitude
+                curr_inner_magnitude = curr_inner_magnitude_betting_fraction * curr_inner_magnitude_wealth
+
+            # define total iteration
+            total_iter = total_iter + n_points
+
+            # compute meta-gradient
+            meta_gradient = np.sum(all_gradients, axis=0)
+
+            # define meta step size
+            meta_step_size = (1 / (self.L * self.R * n_points)) * np.sqrt(2 / task_iteration)
+
+            # update meta-direction
+            curr_meta_direction = l2_unit_ball_projection(prev_meta_direction - meta_step_size * meta_gradient)
+
+            # update meta-magnitude_wealth
+            curr_meta_magnitude_wealth = prev_meta_magnitude_wealth - (1 / (self.R * self.L * n_points)) * meta_gradient @ prev_meta_direction * prev_meta_magnitude
+
+            # update meta-magnitude_betting_fraction
+            curr_meta_magnitude_betting_fraction = -(1/total_iter) * ((total_iter-1) *prev_meta_magnitude_betting_fraction + (1 / (self.L * self.R * n_points)) * (meta_gradient @ prev_meta_direction))
+
+            # update meta-magnitude
+            curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
+
+            curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
+            best_mtl_performances.append(curr_test_perf)
+
+        self.all_meta_parameters = all_meta_parameters
+        return pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
+
+
 class ParameterFreeLazyVariation:
     def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
         self.L = lipschitz_constant

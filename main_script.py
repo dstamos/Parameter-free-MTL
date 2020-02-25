@@ -1,7 +1,7 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
 from src.indipendent_learning import ParameterFreeFixedBiasVariation
-from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation, ParameterFreeAggressiveClassic
+from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation, ParameterFreeAggressiveClassic, ParameterFreeLazyClassic
 import time
 from src.plotting import plot_stuff
 import argparse
@@ -61,7 +61,7 @@ def main():
         errors_lazy = model.fit(data)
         all_errors_lazy.append(errors_lazy)
 
-        model = ParameterFreeAggressiveClassic()
+        model = ParameterFreeAggressiveVariation()
         mtl_errors_aggressive, cumulative_errors_aggressive = model.fit(data)
         all_accumulative_errors_aggressive.append(cumulative_errors_aggressive)
         all_mtl_errors_aggressive.append(mtl_errors_aggressive)
