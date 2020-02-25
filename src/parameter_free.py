@@ -17,8 +17,10 @@ class ParameterFreeAggressiveClassic:
     def fit(self, data):
         # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 10)
         # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
-        range_shit_meta = np.linspace(0.1, 1000, 30)
-        range_shit_inner = np.linspace(0.1, 1000, 30)
+        # range_shit_meta = np.linspace(0.1, 1000, 30)
+        # range_shit_inner = np.linspace(0.1, 1000, 30)
+        range_shit_meta = [100]
+        range_shit_inner = [100]
 
         best_cumsum_perf = np.Inf
         for _, value_shit_meta in enumerate(range_shit_meta):
@@ -288,7 +290,6 @@ class ParameterFreeLazyClassic:
         curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
         curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
-        all_h_meta = []
         all_individual_cum_errors = []
         best_mtl_performances = []
 
@@ -314,8 +315,6 @@ class ParameterFreeLazyClassic:
             curr_inner_magnitude_wealth = self.inner_magnitude_wealth
             curr_inner_magnitude = curr_inner_magnitude_betting_fraction * curr_inner_magnitude_wealth
             curr_inner_direction = np.zeros(x.shape[1])
-
-            all_h_inner = []
 
             temp_weight_vectors = []
             all_gradients = []
@@ -377,7 +376,7 @@ class ParameterFreeLazyClassic:
             curr_meta_magnitude_wealth = prev_meta_magnitude_wealth - (1 / (self.R * self.L * n_points)) * meta_gradient @ prev_meta_direction * prev_meta_magnitude
 
             # update meta-magnitude_betting_fraction
-            curr_meta_magnitude_betting_fraction = -(1/total_iter) * ((total_iter-1) *prev_meta_magnitude_betting_fraction + (1 / (self.L * self.R * n_points)) * (meta_gradient @ prev_meta_direction))
+            curr_meta_magnitude_betting_fraction = -(1/task_iteration) * ((task_iteration-1) * prev_meta_magnitude_betting_fraction + (1 / (self.L * self.R * n_points)) * (meta_gradient @ prev_meta_direction))
 
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
