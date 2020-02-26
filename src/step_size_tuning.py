@@ -16,6 +16,7 @@ class ParameterFreeAggressiveVariationStepSearch:
             for _, meta_step_size in enumerate(self.meta_step_size_range):
                 all_individual_cum_errors = []
                 all_mtl_performances = []
+                all_final_weight_vectors = []
 
                 curr_metaparameter = np.zeros(data.features_tr[0].shape[1])
                 for task_iteration, task in enumerate(data.tr_task_indexes):
@@ -32,12 +33,8 @@ class ParameterFreeAggressiveVariationStepSearch:
                     shuffled_indexes = list(range(n_points))
                     np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
-                        inner_iteration = inner_iteration + 1
                         prev_untranslated_weights = curr_untranslated_weights
                         prev_metaparameter = curr_metaparameter
-
-                        # define total iteration
-                        total_iter = self.__general_iteration(task_iteration, n_points, inner_iteration)
 
                         # update inner weight vector
                         curr_weights = curr_untranslated_weights + curr_metaparameter
@@ -62,9 +59,10 @@ class ParameterFreeAggressiveVariationStepSearch:
                         # update the untranslated weights
                         curr_untranslated_weights = prev_untranslated_weights - inner_step_size * full_gradient
 
+                    all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
                     all_test_errors = []
-                    for curr_test_task in data.tr_task_indexes[:task_iteration]:
-                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                    for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
                     all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 average_stuff = pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()

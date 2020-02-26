@@ -32,6 +32,8 @@ class ParameterFreeAggressiveClassic:
                 curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
                 curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
+                all_final_weight_vectors = []
+
                 all_mtl_performances = []
                 all_meta_parameters = []
                 for task_iteration, task in enumerate(data.tr_task_indexes):
@@ -50,8 +52,6 @@ class ParameterFreeAggressiveClassic:
                     curr_inner_wealth = self.inner_magnitude_wealth
                     curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
                     curr_inner_direction = np.zeros(n_dims)
-
-                    all_h_inner = []
 
                     temp_weight_vectors = []
                     shuffled_indexes = list(range(n_points))
@@ -117,9 +117,10 @@ class ParameterFreeAggressiveClassic:
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
 
+                    all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
                     all_test_errors = []
-                    for curr_test_task in data.tr_task_indexes[:task_iteration]:
-                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                    for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
                     all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 if np.nanmean(all_individual_cum_errors) < best_cumsum_perf:
@@ -165,6 +166,7 @@ class ParameterFreeAggressiveVariation:
                 curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
                 curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
+                all_final_weight_vectors = []
                 all_h_meta = []
                 all_mtl_performances = []
                 all_meta_parameters = []
@@ -260,9 +262,10 @@ class ParameterFreeAggressiveVariation:
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
 
+                    all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
                     all_test_errors = []
-                    for curr_test_task in data.tr_task_indexes[:task_iteration]:
-                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                    for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
                     all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 if np.nanmean(all_individual_cum_errors) < best_cumsum_perf:
