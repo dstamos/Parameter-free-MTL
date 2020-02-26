@@ -148,8 +148,10 @@ class ParameterFreeAggressiveVariation:
     def fit(self, data):
         # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 10)
         # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
-        range_shit_meta = np.linspace(0.1, 1000, 30)
-        range_shit_inner = np.linspace(0.1, 1000, 30)
+        # range_shit_meta = np.linspace(0.1, 1000, 30)
+        # range_shit_inner = np.linspace(0.1, 1000, 30)
+        range_shit_meta = [100]
+        range_shit_inner = [100]
 
         best_cumsum_perf = np.Inf
         for _, value_shit_meta in enumerate(range_shit_meta):
@@ -385,7 +387,7 @@ class ParameterFreeLazyClassic:
             best_mtl_performances.append(curr_test_perf)
 
         self.all_meta_parameters = all_meta_parameters
-        return pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
+        return None, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
 
 class ParameterFreeLazyVariation:
@@ -511,4 +513,4 @@ class ParameterFreeLazyVariation:
             best_mtl_performances.append(curr_test_perf)
 
         self.all_meta_parameters = all_meta_parameters
-        return pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
+        return None, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()

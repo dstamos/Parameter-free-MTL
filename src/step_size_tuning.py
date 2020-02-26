@@ -151,7 +151,7 @@ class ParameterFreeLazyVariationStepSearch:
                 # plt.pause(0.1)
                 # k = 1
 
-        return best_average
+        return None, best_average
 
 
 class ParameterFreeLazyVariationStepSearch:
