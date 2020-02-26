@@ -83,7 +83,7 @@ def main():
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
             elif curr_method == 'Lazy_step_search':
-                model = ParameterFreeAggressiveVariationStepSearch()
+                model = ParameterFreeLazyVariationStepSearch()
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)

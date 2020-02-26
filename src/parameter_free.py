@@ -117,8 +117,10 @@ class ParameterFreeAggressiveClassic:
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
 
-                    curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-                    all_mtl_performances.append(curr_test_perf)
+                    all_test_errors = []
+                    for curr_test_task in data.tr_task_indexes[:task_iteration]:
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                    all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 if np.nanmean(all_individual_cum_errors) < best_cumsum_perf:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
@@ -126,7 +128,7 @@ class ParameterFreeAggressiveClassic:
                     best_mtl_performances = all_mtl_performances
                     print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meta  wealth: %8.2f | perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f | perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
@@ -148,8 +150,8 @@ class ParameterFreeAggressiveVariation:
     def fit(self, data):
         # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 10)
         # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
-        # range_shit_meta = np.linspace(0.1, 1000, 30)
-        # range_shit_inner = np.linspace(0.1, 1000, 30)
+        # range_shit_meta = np.linspace(0.01, 1, 3)
+        # range_shit_inner = np.linspace(1, 400, 15)
         range_shit_meta = [100]
         range_shit_inner = [100]
 
@@ -258,8 +260,10 @@ class ParameterFreeAggressiveVariation:
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
 
-                    curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-                    all_mtl_performances.append(curr_test_perf)
+                    all_test_errors = []
+                    for curr_test_task in data.tr_task_indexes[:task_iteration]:
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                    all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 if np.nanmean(all_individual_cum_errors) < best_cumsum_perf:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
@@ -267,7 +271,7 @@ class ParameterFreeAggressiveVariation:
                     best_mtl_performances = all_mtl_performances
                     print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meta  wealth: %8.2f| perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f| perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
@@ -383,8 +387,10 @@ class ParameterFreeLazyClassic:
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
-            curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-            best_mtl_performances.append(curr_test_perf)
+            all_test_errors = []
+            for curr_test_task in data.tr_task_indexes[:task_iteration]:
+                all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
+                best_mtl_performances.append(np.nanmean(all_test_errors))
 
         self.all_meta_parameters = all_meta_parameters
         return None, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
