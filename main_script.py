@@ -2,6 +2,7 @@ import numpy as np
 from src.data_management import DataHandler, Settings
 from src.indipendent_learning import ParameterFreeFixedBiasVariation
 from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation, ParameterFreeAggressiveClassic, ParameterFreeLazyClassic
+from src.step_size_tuning import ParameterFreeLazyVariationStepSearch, ParameterFreeAggressiveVariationStepSearch
 import time
 from src.plotting import plot_stuff
 import argparse

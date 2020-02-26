@@ -124,9 +124,9 @@ class ParameterFreeAggressiveClassic:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
                     best_cumsum_performances = all_individual_cum_errors
                     best_mtl_performances = all_mtl_performances
-                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %7.4f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meat  wealth: %8.2f | perf: %7.4f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta  wealth: %8.2f | perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
@@ -263,9 +263,9 @@ class ParameterFreeAggressiveVariation:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
                     best_cumsum_performances = all_individual_cum_errors
                     best_mtl_performances = all_mtl_performances
-                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %7.4f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meat  wealth: %8.2f| perf: %7.4f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta  wealth: %8.2f| perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
