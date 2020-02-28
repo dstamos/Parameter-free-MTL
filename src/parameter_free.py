@@ -78,10 +78,7 @@ class ParameterFreeAggressiveClassic:
                         curr_x = x[curr_point_idx, :]
                         curr_y = y[curr_point_idx]
 
-                        if len(temp_weight_vectors) > 1:
-                            all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
-                        else:
-                            all_individual_cum_errors.append(np.nan)
+                        all_individual_cum_errors.append(loss(curr_x, curr_y, weight_vector, loss_name='absolute'))
 
                         # compute the gradient
                         subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
@@ -214,10 +211,7 @@ class ParameterFreeAggressiveVariation:
                         curr_x = x[curr_point_idx, :]
                         curr_y = y[curr_point_idx]
 
-                        if len(temp_weight_vectors) > 1:
-                            all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
-                        else:
-                            all_individual_cum_errors.append(np.nan)
+                        all_individual_cum_errors.append(loss(curr_x, curr_y, weight_vector, loss_name='absolute'))
 
                         # compute the gradient
                         subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
@@ -344,10 +338,7 @@ class ParameterFreeLazyClassic:
                 curr_x = x[curr_point_idx, :]
                 curr_y = y[curr_point_idx]
 
-                if len(temp_weight_vectors) > 1:
-                    all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
-                else:
-                    all_individual_cum_errors.append(np.nan)
+                all_individual_cum_errors.append(loss(curr_x, curr_y, weight_vector, loss_name='absolute'))
 
                 # compute the gradient
                 subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
@@ -464,10 +455,7 @@ class ParameterFreeLazyVariation:
                 curr_x = x[curr_point_idx, :]
                 curr_y = y[curr_point_idx]
 
-                if len(temp_weight_vectors) > 1:
-                    all_individual_cum_errors.append(loss(curr_x, curr_y, temp_weight_vectors[-2], loss_name='absolute'))
-                else:
-                    all_individual_cum_errors.append(np.nan)
+                all_individual_cum_errors.append(loss(curr_x, curr_y, weight_vector, loss_name='absolute'))
 
                 # compute the gradient
                 subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')

@@ -39,7 +39,7 @@ class DataHandler:
 
         if self.settings.data.dataset == 'synthetic-regression':
             self.synthetic_regression_data_gen()
-        elif self.settings.data.dataset == 'synthetic-regression':
+        elif self.settings.data.dataset == 'synthetic-classification':
             self.synthetic_classification_data_gen()
         else:
             raise ValueError('Invalid dataset')
