@@ -55,7 +55,7 @@ class ParameterFreeAggressiveClassic:
 
                     temp_weight_vectors = []
                     shuffled_indexes = list(range(n_points))
-                    np.random.shuffle(shuffled_indexes)
+                    # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                         inner_iteration = inner_iteration + 1
                         prev_inner_direction = curr_inner_direction
@@ -188,7 +188,7 @@ class ParameterFreeAggressiveVariation:
 
                     temp_weight_vectors = []
                     shuffled_indexes = list(range(n_points))
-                    np.random.shuffle(shuffled_indexes)
+                    # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                         inner_iteration = inner_iteration + 1
                         prev_inner_direction = curr_inner_direction
@@ -322,7 +322,7 @@ class ParameterFreeLazyClassic:
             temp_weight_vectors = []
             all_gradients = []
             shuffled_indexes = list(range(n_points))
-            np.random.shuffle(shuffled_indexes)
+            # np.random.shuffle(shuffled_indexes)
             for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                 inner_iteration = inner_iteration + 1
                 prev_inner_direction = curr_inner_direction
@@ -439,7 +439,7 @@ class ParameterFreeLazyVariation:
             temp_weight_vectors = []
             all_gradients = []
             shuffled_indexes = list(range(n_points))
-            np.random.shuffle(shuffled_indexes)
+            # np.random.shuffle(shuffled_indexes)
             for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                 inner_iteration = inner_iteration + 1
                 prev_inner_direction = curr_inner_direction

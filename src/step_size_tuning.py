@@ -31,7 +31,7 @@ class ParameterFreeAggressiveVariationStepSearch:
                     curr_untranslated_weights = np.zeros(n_dims)
                     temp_weight_vectors = []
                     shuffled_indexes = list(range(n_points))
-                    np.random.shuffle(shuffled_indexes)
+                    # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                         prev_untranslated_weights = curr_untranslated_weights
                         prev_metaparameter = curr_metaparameter
@@ -104,7 +104,7 @@ class ParameterFreeLazyVariationStepSearch:
                     curr_untranslated_weights = np.zeros(n_dims)
 
                     shuffled_indexes = list(range(n_points))
-                    np.random.shuffle(shuffled_indexes)
+                    # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
 
                         prev_untranslated_weights = curr_untranslated_weights
