@@ -1,6 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
+import matplotlib
+matplotlib.use('Agg')
 
 
 def plot_stuff(results, methods):
@@ -56,4 +58,43 @@ def plot_stuff(results, methods):
     plt.tight_layout()
     plt.savefig('temp_mtl' + '_' + str(datetime.datetime.now()).replace(':', '') + '.png', format='png')
     plt.pause(0.01)
+    plt.close()
+
+
+def plot_grid(grid, x_range, y_range, name, timestamp):
+    max_idx = np.unravel_index(np.argmax(grid, axis=None), grid.shape)
+
+    import matplotlib
+    import warnings
+
+    class SqueezedNorm(matplotlib.colors.Normalize):
+        def __init__(self, vmin=None, vmax=None, mid=0.0, s1=2.0, s2=2.0, clip=False):
+            self.vmin = vmin  # minimum value
+            self.mid = mid  # middle value
+            self.vmax = vmax  # maximum value
+            self.s1 = s1
+            self.s2 = s2
+            warnings.filterwarnings("ignore", category=RuntimeWarning)
+            f = lambda x, zero, vmax, s: np.abs((x - zero) / (vmax - zero)) ** (1. / s) * 0.5
+            self.g = lambda x, zero, vmin, vmax, s1, s2: f(x, zero, vmax, s1) * (x >= zero) - f(x, zero, vmin, s2) * (x < zero) + 0.5
+            matplotlib.colors.Normalize.__init__(self, vmin, vmax, clip)
+
+        def __call__(self, value, clip=None):
+            r = self.g(value, self.mid, self.vmin, self.vmax, self.s1, self.s2)
+            return np.ma.masked_array(r)
+
+    # norm = SqueezedNorm(vmin=np.nanmin(grid[:]), vmax=np.nanmax(grid[:]), mid=3.5, s1=1, s2=1)
+    norm = SqueezedNorm(vmin=2.8, vmax=9, mid=4.5, s1=1, s2=1)
+    my_dpi = 100
+    plt.figure(figsize=(1080 / my_dpi, 1080 / my_dpi), facecolor='white', dpi=my_dpi)
+    plt.imshow(grid.T, origin='lower', extent=[np.min(x_range),
+                                               np.max(x_range),
+                                               np.min(y_range),
+                                               np.max(y_range)], interpolation="none",
+               cmap='RdYlGn_r', aspect='auto', norm=norm)
+    plt.title(name)
+    plt.xlabel('inner step size')
+    plt.ylabel('meta step size')
+    plt.colorbar()
+    plt.savefig('grid_' + name + '_' + str(timestamp).replace(':', '') + '.png', format='png')
     plt.close()

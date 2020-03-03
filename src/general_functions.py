@@ -1,4 +1,7 @@
 import numpy as np
+import matplotlib
+matplotlib.use("TkAgg")
+import matplotlib.pyplot as plt
 
 
 def l2_unit_ball_projection(vector):
@@ -41,3 +44,15 @@ def loss(x, y, w, loss_name='hinge'):
             return np.abs(y - x @ w)
     else:
         raise ValueError("Unknown loss.")
+
+
+def mypause(interval):
+    backend = plt.rcParams['backend']
+    if backend in matplotlib.rcsetup.interactive_bk:
+        fig_manager = matplotlib._pylab_helpers.Gcf.get_active()
+        if fig_manager is not None:
+            canvas = fig_manager.canvas
+            if canvas.figure.stale:
+                canvas.draw()
+            canvas.start_event_loop(interval)
+            return
