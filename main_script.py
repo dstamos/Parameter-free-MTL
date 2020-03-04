@@ -15,13 +15,16 @@ def main():
     matplotlib.rc('font', **font)
 
     methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_classic', 'Lazy_classic', 'Aggressive_step_search', 'Lazy_step_search']
+    # methods = ['Aggressive_step_search', 'Lazy_step_search']
+    # methods = ['Aggressive', 'Aggressive_step_search']
+    # methods = ['Aggressive']
     results = {}
     for curr_method in methods:
         results[curr_method + '_mtl'] = []
         results[curr_method + '_accu'] = []
 
     tt = time.time()
-    for seed in range(2):
+    for seed in range(1):
         np.random.seed(seed)
         general_settings = {'seed': seed,
                             'verbose': 1}

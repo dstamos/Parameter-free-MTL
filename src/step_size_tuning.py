@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 class ParameterFreeAggressiveVariationStepSearch:
     def __init__(self):
-        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 12)]
-        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 12)]
+        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
+        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
 
     def fit(self, data):
 
@@ -79,8 +79,8 @@ class ParameterFreeAggressiveVariationStepSearch:
 
 class ParameterFreeLazyVariationStepSearch:
     def __init__(self):
-        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 12)]
-        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 12)]
+        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
+        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
 
     def fit(self, data):
 

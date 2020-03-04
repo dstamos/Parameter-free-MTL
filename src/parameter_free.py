@@ -4,31 +4,23 @@ from src.general_functions import l2_unit_ball_projection, subgradient, loss
 
 
 class ParameterFreeAggressiveClassic:
-    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
-        self.L = lipschitz_constant
-        self.R = input_norm_bound
-        self.all_weight_vectors = []
-        self.all_meta_parameters = []
-        self.meta_magnitude_betting_fraction = 0
-        self.meta_magnitude_wealth = meta_initial_wealth
-        self.inner_magnitude_betting_fraction = 0
-        self.inner_magnitude_wealth = inner_initial_wealth
+    def __init__(self):
+        self.L = 1
+        self.R = 1
 
     def fit(self, data):
-        # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 10)
-        # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
-        # range_shit_meta = np.linspace(0.1, 1000, 30)
-        # range_shit_inner = np.linspace(0.1, 1000, 30)
-        range_shit_meta = [100]
-        range_shit_inner = [100]
+        meta_wealth_range = np.linspace(1e-4, 100, 12)
+        inner_wealth_range = np.linspace(1e-4, 100, 12)
+        # meta_wealth_range = [100]
+        # inner_wealth_range = [100]
 
         best_cumsum_perf = np.Inf
-        for _, value_shit_meta in enumerate(range_shit_meta):
-            for _, value_shit_inner in enumerate(range_shit_inner):
+        for _, meta_wealth in enumerate(meta_wealth_range):
+            for _, inner_wealth in enumerate(inner_wealth_range):
                 all_individual_cum_errors = []
 
-                curr_meta_fraction = self.meta_magnitude_betting_fraction
-                curr_meta_wealth = value_shit_meta  # self.meta_magnitude_wealth
+                curr_meta_fraction = 0
+                curr_meta_wealth = meta_wealth
                 curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
                 curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
@@ -43,13 +35,13 @@ class ParameterFreeAggressiveClassic:
                     task_iteration = task_iteration + 1
                     prev_meta_direction = curr_meta_direction
                     prev_meta_fraction = curr_meta_fraction
-                    prev_meta_wealth = value_shit_inner  # curr_meta_wealth
+                    prev_meta_wealth = curr_meta_wealth
                     prev_meta_magnitude = curr_meta_magnitude
 
                     # initialize the inner parameters
                     n_points, n_dims = x.shape
-                    curr_inner_fraction = self.inner_magnitude_betting_fraction
-                    curr_inner_wealth = self.inner_magnitude_wealth
+                    curr_inner_fraction = 0
+                    curr_inner_wealth = inner_wealth
                     curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
                     curr_inner_direction = np.zeros(n_dims)
 
@@ -109,7 +101,7 @@ class ParameterFreeAggressiveClassic:
                         curr_inner_wealth = prev_inner_wealth - 1 / (self.R * self.L) * full_gradient @ prev_inner_direction * prev_inner_magnitude
 
                         # update magnitude_betting_fraction
-                        curr_inner_fraction = -(1 / inner_iteration) * ((inner_iteration - 1) * prev_inner_fraction + (1 / (self.L * self.R)) * (full_gradient @ prev_inner_direction))
+                        curr_inner_fraction = (1 / inner_iteration) * ((inner_iteration - 1) * prev_inner_fraction - (1 / (self.L * self.R)) * (full_gradient @ prev_inner_direction))
 
                         # update magnitude
                         curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
@@ -124,9 +116,9 @@ class ParameterFreeAggressiveClassic:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
                     best_cumsum_performances = all_individual_cum_errors
                     best_mtl_performances = all_mtl_performances
-                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (inner_wealth, meta_wealth, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meta wealth: %8.2f | perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f | perf: %10.3f' % (inner_wealth, meta_wealth, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
@@ -135,31 +127,29 @@ class ParameterFreeAggressiveClassic:
 
 
 class ParameterFreeAggressiveVariation:
-    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
-        self.L = lipschitz_constant
-        self.R = input_norm_bound
+    def __init__(self):
+        self.L = 1
+        self.R = 1
         self.all_weight_vectors = []
         self.all_meta_parameters = []
         self.meta_magnitude_betting_fraction = 0
-        self.meta_magnitude_wealth = meta_initial_wealth
         self.inner_magnitude_betting_fraction = 0
-        self.inner_magnitude_wealth = inner_initial_wealth
 
     def fit(self, data):
-        # range_shit_meta = np.linspace(1, data.features_tr[0].shape[0] * len(data.tr_task_indexes), 10)
-        # range_shit_inner = np.linspace(1, data.features_tr[0].shape[0], 10)
-        # range_shit_meta = np.linspace(0.01, 1, 3)
-        # range_shit_inner = np.linspace(1, 400, 15)
-        range_shit_meta = [100]
-        range_shit_inner = [100]
+        # meta_wealth_range = np.linspace(1e-4, 400, 32)
+        # inner_wealth_range = np.linspace(1e-4, 400, 32)
+        meta_wealth_range = np.linspace(1e-4, 100, 12)
+        inner_wealth_range = np.linspace(1e-4, 100, 12)
+        # meta_wealth_range = [100]
+        # inner_wealth_range = [100]
 
         best_cumsum_perf = np.Inf
-        for _, value_shit_meta in enumerate(range_shit_meta):
-            for _, value_shit_inner in enumerate(range_shit_inner):
+        for meta_idx, meta_wealth in enumerate(meta_wealth_range):
+            for inner_idx, inner_wealth in enumerate(inner_wealth_range):
                 all_individual_cum_errors = []
 
                 curr_meta_fraction = self.meta_magnitude_betting_fraction
-                curr_meta_wealth = value_shit_meta  # self.meta_magnitude_wealth
+                curr_meta_wealth = meta_wealth
                 curr_meta_magnitude = curr_meta_fraction * curr_meta_wealth
                 curr_meta_direction = np.zeros(data.features_tr[0].shape[1])
 
@@ -174,13 +164,13 @@ class ParameterFreeAggressiveVariation:
                     task_iteration = task_iteration + 1
                     prev_meta_direction = curr_meta_direction
                     prev_meta_fraction = curr_meta_fraction
-                    prev_meta_wealth = value_shit_inner  # curr_meta_wealth
+                    prev_meta_wealth = curr_meta_wealth
                     prev_meta_magnitude = curr_meta_magnitude
 
                     # initialize the inner parameters
                     n_points, n_dims = x.shape
                     curr_inner_fraction = self.inner_magnitude_betting_fraction
-                    curr_inner_wealth = self.inner_magnitude_wealth
+                    curr_inner_wealth = inner_wealth
                     curr_inner_magnitude = curr_inner_fraction * curr_inner_wealth
                     curr_inner_direction = np.zeros(n_dims)
 
@@ -266,9 +256,10 @@ class ParameterFreeAggressiveVariation:
                     best_cumsum_perf = np.nanmean(all_individual_cum_errors)
                     best_cumsum_performances = all_individual_cum_errors
                     best_mtl_performances = all_mtl_performances
-                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f |       perf: %10.3f' % (inner_wealth, meta_wealth, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner wealth: %8.2f | meta wealth: %8.2f| perf: %10.3f' % (value_shit_inner, value_shit_meta, np.nanmean(all_individual_cum_errors)))
+                    print('inner wealth: %8.2f | meta wealth: %8.2f| perf: %10.3f' % (inner_wealth, meta_wealth, np.nanmean(all_individual_cum_errors)))
+
         return best_mtl_performances, pd.DataFrame(best_cumsum_performances).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
     @staticmethod
@@ -277,15 +268,15 @@ class ParameterFreeAggressiveVariation:
 
 
 class ParameterFreeLazyClassic:
-    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
-        self.L = lipschitz_constant
-        self.R = input_norm_bound
+    def __init__(self):
+        self.L = 1
+        self.R = 1
         self.all_weight_vectors = None
         self.all_meta_parameters = None
         self.meta_magnitude_betting_fraction = 0
-        self.meta_magnitude_wealth = meta_initial_wealth
+        self.meta_magnitude_wealth = 1
         self.inner_magnitude_betting_fraction = 0
-        self.inner_magnitude_wealth = inner_initial_wealth
+        self.inner_magnitude_wealth = 1
 
     def fit(self, data):
         curr_meta_magnitude_betting_fraction = self.meta_magnitude_betting_fraction
@@ -376,7 +367,7 @@ class ParameterFreeLazyClassic:
             curr_meta_magnitude_wealth = prev_meta_magnitude_wealth - (1 / (self.R * self.L * n_points)) * meta_gradient @ prev_meta_direction * prev_meta_magnitude
 
             # update meta-magnitude_betting_fraction
-            curr_meta_magnitude_betting_fraction = -(1/task_iteration) * ((task_iteration-1) * prev_meta_magnitude_betting_fraction + (1 / (self.L * self.R * n_points)) * (meta_gradient @ prev_meta_direction))
+            curr_meta_magnitude_betting_fraction = (1/task_iteration) * ((task_iteration-1) * prev_meta_magnitude_betting_fraction - (1 / (self.L * self.R * n_points)) * (meta_gradient @ prev_meta_direction))
 
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
@@ -391,15 +382,15 @@ class ParameterFreeLazyClassic:
 
 
 class ParameterFreeLazyVariation:
-    def __init__(self, meta_initial_wealth=1, inner_initial_wealth=1, lipschitz_constant=1, input_norm_bound=1):
-        self.L = lipschitz_constant
-        self.R = input_norm_bound
+    def __init__(self):
+        self.L = 1
+        self.R = 1
         self.all_weight_vectors = None
         self.all_meta_parameters = None
         self.meta_magnitude_betting_fraction = 0
-        self.meta_magnitude_wealth = meta_initial_wealth
+        self.meta_magnitude_wealth = 1
         self.inner_magnitude_betting_fraction = 0
-        self.inner_magnitude_wealth = inner_initial_wealth
+        self.inner_magnitude_wealth = 1
 
     def fit(self, data):
         curr_meta_magnitude_betting_fraction = self.meta_magnitude_betting_fraction
