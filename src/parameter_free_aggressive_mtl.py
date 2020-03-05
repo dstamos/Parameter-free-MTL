@@ -9,8 +9,6 @@ class ParameterFreeAggressiveClassic:
         self.R = 1
 
     def fit(self, data):
-        # meta_wealth_range = np.linspace(1e-4, 100, 12)
-        # inner_wealth_range = np.linspace(1e-4, 100, 12)
         meta_wealth_range = [1]
         inner_wealth_range = [1]
 
@@ -138,10 +136,6 @@ class ParameterFreeAggressiveVariation:
         self.inner_magnitude_betting_fraction = 0
 
     def fit(self, data):
-        # meta_wealth_range = np.linspace(1e-4, 400, 4)
-        # inner_wealth_range = [0.01, 1, 2]
-        # meta_wealth_range = np.linspace(1e-4, 100, 12)
-        # inner_wealth_range = np.linspace(1e-4, 100, 12)
         meta_wealth_range = [1]
         inner_wealth_range = [1]
 

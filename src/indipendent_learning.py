@@ -74,12 +74,11 @@ class ParameterFreeFixedBiasVariation:
             y = data.labels_tr[task]
             n_points, n_dims = x.shape
 
-            # range_shit = np.linspace(0.1, n_points, 20)
-            range_shit = [1]
-            for idx, value_shit in enumerate(range_shit):
+            wealth_range = [1]
+            for idx, wealth in enumerate(wealth_range):
                 curr_bet_fraction = self.magnitude_betting_fraction
 
-                curr_wealth = value_shit   # self.magnitude_wealth
+                curr_wealth = wealth   # self.magnitude_wealth
                 curr_magnitude = curr_bet_fraction * curr_wealth
                 curr_direction = np.random.randn(n_dims)
 
