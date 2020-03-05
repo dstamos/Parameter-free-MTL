@@ -9,10 +9,10 @@ class ParameterFreeAggressiveClassic:
         self.R = 1
 
     def fit(self, data):
-        meta_wealth_range = np.linspace(1e-4, 100, 12)
-        inner_wealth_range = np.linspace(1e-4, 100, 12)
-        # meta_wealth_range = [100]
-        # inner_wealth_range = [100]
+        # meta_wealth_range = np.linspace(1e-4, 100, 12)
+        # inner_wealth_range = np.linspace(1e-4, 100, 12)
+        meta_wealth_range = [1]
+        inner_wealth_range = [1]
 
         best_cumsum_perf = np.Inf
         for _, meta_wealth in enumerate(meta_wealth_range):
@@ -33,10 +33,6 @@ class ParameterFreeAggressiveClassic:
                     y = data.labels_tr[task]
 
                     task_iteration = task_iteration + 1
-                    prev_meta_direction = curr_meta_direction
-                    prev_meta_fraction = curr_meta_fraction
-                    prev_meta_wealth = curr_meta_wealth
-                    prev_meta_magnitude = curr_meta_magnitude
 
                     # initialize the inner parameters
                     n_points, n_dims = x.shape
@@ -50,6 +46,12 @@ class ParameterFreeAggressiveClassic:
                     # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                         inner_iteration = inner_iteration + 1
+
+                        prev_meta_direction = curr_meta_direction
+                        prev_meta_fraction = curr_meta_fraction
+                        prev_meta_wealth = curr_meta_wealth
+                        prev_meta_magnitude = curr_meta_magnitude
+
                         prev_inner_direction = curr_inner_direction
                         prev_inner_fraction = curr_inner_fraction
                         prev_inner_wealth = curr_inner_wealth
@@ -136,12 +138,12 @@ class ParameterFreeAggressiveVariation:
         self.inner_magnitude_betting_fraction = 0
 
     def fit(self, data):
-        meta_wealth_range = np.linspace(1e-4, 400, 4)
-        inner_wealth_range = [0.01, 1, 2]
+        # meta_wealth_range = np.linspace(1e-4, 400, 4)
+        # inner_wealth_range = [0.01, 1, 2]
         # meta_wealth_range = np.linspace(1e-4, 100, 12)
         # inner_wealth_range = np.linspace(1e-4, 100, 12)
-        # meta_wealth_range = [100]
-        # inner_wealth_range = [100]
+        meta_wealth_range = [1]
+        inner_wealth_range = [1]
 
         best_cumsum_perf = np.Inf
         for meta_idx, meta_wealth in enumerate(meta_wealth_range):
@@ -162,10 +164,6 @@ class ParameterFreeAggressiveVariation:
                     y = data.labels_tr[task]
 
                     task_iteration = task_iteration + 1
-                    prev_meta_direction = curr_meta_direction
-                    prev_meta_fraction = curr_meta_fraction
-                    prev_meta_wealth = curr_meta_wealth
-                    prev_meta_magnitude = curr_meta_magnitude
 
                     # initialize the inner parameters
                     n_points, n_dims = x.shape
@@ -181,6 +179,12 @@ class ParameterFreeAggressiveVariation:
                     # np.random.shuffle(shuffled_indexes)
                     for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
                         inner_iteration = inner_iteration + 1
+
+                        prev_meta_direction = curr_meta_direction
+                        prev_meta_fraction = curr_meta_fraction
+                        prev_meta_wealth = curr_meta_wealth
+                        prev_meta_magnitude = curr_meta_magnitude
+
                         prev_inner_direction = curr_inner_direction
                         prev_inner_fraction = curr_inner_fraction
                         prev_inner_wealth = curr_inner_wealth
