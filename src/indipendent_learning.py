@@ -57,14 +57,13 @@ class BasicBias:
 
 
 class ParameterFreeFixedBiasVariation:
-    def __init__(self, fixed_bias, initial_wealth=1, lipschitz_constant=1, input_norm_bound=1, verbose=0):
-        self.L = lipschitz_constant
-        self.R = input_norm_bound
+    def __init__(self, fixed_bias):
+        self.L = 1
+        self.R = 1
         self.fixed_bias = fixed_bias
         self.w = None
         self.magnitude_betting_fraction = 0
-        self.magnitude_wealth = initial_wealth
-        self.verbose = verbose
+        self.magnitude_wealth = 1
 
     def fit(self, data, task_indexes):
 
