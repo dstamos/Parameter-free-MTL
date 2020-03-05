@@ -26,7 +26,7 @@ for task_idx in range(n_tasks):
     features = features / norm(features, axis=1, keepdims=True)
 
     # generating and normalizing the weight vectors
-    weight_vector = oracle  # + np.random.normal(loc=np.zeros(dims), scale=1).ravel()
+    weight_vector = oracle + np.random.normal(loc=np.zeros(dims), scale=1).ravel()
 
     # generating labels and adding noise
     clean_labels = features @ weight_vector
