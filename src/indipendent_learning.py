@@ -102,10 +102,7 @@ class ParameterFreeFixedBiasVariation:
                     curr_x = x[curr_point_idx, :]
                     curr_y = y[curr_point_idx]
 
-                    if iteration > 2:
-                        all_errors.append(loss(curr_x, curr_y, all_weight_vectors[-2], loss_name='absolute'))
-                    else:
-                        all_errors.append(np.nan)
+                    all_errors.append(loss(curr_x, curr_y, weight_vector, loss_name='absolute'))
 
                     # compute the gradient
                     subgrad = subgradient(curr_x, curr_y, weight_vector, loss_name='absolute')
