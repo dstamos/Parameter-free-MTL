@@ -1,7 +1,8 @@
 import numpy as np
 from src.data_management import DataHandler, Settings
 from src.indipendent_learning import ParameterFreeFixedBiasVariation
-from src.parameter_free import ParameterFreeAggressiveVariation, ParameterFreeLazyVariation, ParameterFreeAggressiveClassic, ParameterFreeLazyClassic
+from src.parameter_free_aggressive_mtl import ParameterFreeAggressiveVariation, ParameterFreeAggressiveClassic
+from src.parameter_free_lazy_mtl import ParameterFreeLazyVariation, ParameterFreeLazyClassic
 from src.step_size_tuning import ParameterFreeLazyVariationStepSearch, ParameterFreeAggressiveVariationStepSearch
 import time
 from src.plotting import plot_stuff
@@ -14,17 +15,17 @@ def main():
     import matplotlib
     matplotlib.rc('font', **font)
 
-    methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_classic', 'Lazy_classic', 'Aggressive_step_search', 'Lazy_step_search']
-    # methods = ['Aggressive_step_search', 'Lazy_step_search']
-    # methods = ['Aggressive', 'Aggressive_step_search']
-    # methods = ['Aggressive']
+    # methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT', 'Aggressive_SS', 'Lazy_SS']
+    methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT']
+    # methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy']
+
     results = {}
     for curr_method in methods:
         results[curr_method + '_mtl'] = []
         results[curr_method + '_accu'] = []
 
     tt = time.time()
-    for seed in range(1):
+    for seed in range(2):
         np.random.seed(seed)
         general_settings = {'seed': seed,
                             'verbose': 1}
@@ -50,13 +51,14 @@ def main():
         data = DataHandler(settings)
 
         for curr_method in methods:
+            print(curr_method)
             if curr_method == 'ITL':
-                model = ParameterFreeFixedBiasVariation(np.zeros(data.oracle.shape), verbose=1)
+                model = ParameterFreeFixedBiasVariation(np.zeros(data.oracle.shape))
                 mtl_errors, accumulated_errors = model.fit(data, 'tr_task_indexes')
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
             elif curr_method == 'Oracle':
-                model = ParameterFreeFixedBiasVariation(data.oracle, verbose=1)
+                model = ParameterFreeFixedBiasVariation(data.oracle)
                 mtl_errors, accumulated_errors = model.fit(data, 'tr_task_indexes')
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
@@ -70,27 +72,27 @@ def main():
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
-            elif curr_method == 'Aggressive_classic':
+            elif curr_method == 'Aggressive_KT':
                 model = ParameterFreeAggressiveClassic()
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
-            elif curr_method == 'Lazy_classic':
+            elif curr_method == 'Lazy_KT':
                 model = ParameterFreeLazyClassic()
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
-            elif curr_method == 'Aggressive_step_search':
+            elif curr_method == 'Aggressive_SS':
                 model = ParameterFreeAggressiveVariationStepSearch()
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
-            elif curr_method == 'Lazy_step_search':
+            elif curr_method == 'Lazy_SS':
                 model = ParameterFreeLazyVariationStepSearch()
                 mtl_errors, accumulated_errors = model.fit(data)
                 results[curr_method + '_mtl'].append(mtl_errors)
                 results[curr_method + '_accu'].append(accumulated_errors)
-
+            print('%s done %5.2f' % (curr_method, time.time() - tt))
         print('seed: %d | %5.2f sec' % (seed, time.time() - tt))
 
     plot_stuff(results, methods)
