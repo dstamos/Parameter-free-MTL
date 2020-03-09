@@ -14,10 +14,35 @@ def plot_stuff(results, methods):
     my_dpi = 100
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
-    plt.ylim(bottom=2, top=10)
+    plt.ylim(bottom=11, top=15)
     for idx, curr_method in enumerate(methods):
-        color = colors[idx]
-        linestyle = np.random.choice(linestyles, 1)[0]
+        # color = colors[idx]
+        # linestyle = np.random.choice(linestyles, 1)[0]
+
+        if curr_method == 'ITL':
+            color = 'black'
+            linestyle = '-'
+        elif curr_method == 'Oracle':
+            color = 'red'
+            linestyle = '-'
+        elif curr_method == 'Aggressive':
+            color = 'tab:blue'
+            linestyle = '-.'
+        elif curr_method == 'Lazy':
+            color = 'tab:green'
+            linestyle = ':'
+        elif curr_method == 'Aggressive_KT':
+            color = 'tab:brown'
+            linestyle = '-.'
+        elif curr_method == 'Lazy_KT':
+            color = 'tab:orange'
+            linestyle = ':'
+        elif curr_method == 'Aggressive_SS':
+            color = 'tab:olive'
+            linestyle = '-.'
+        elif curr_method == 'Lazy_SS':
+            color = 'tab:purple'
+            linestyle = ':'
 
         mean = np.nanmean(results[curr_method + '_accu'], axis=0)
         std = np.nanstd(results[curr_method + '_accu'], axis=0)
@@ -37,11 +62,36 @@ def plot_stuff(results, methods):
     my_dpi = 100
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
-    plt.ylim(bottom=2, top=10)
+    plt.ylim(bottom=11, top=15)
     for idx, curr_method in enumerate(methods):
 
-        color = colors[idx]
-        linestyle = np.random.choice(linestyles, 1)[0]
+        # color = colors[idx]
+        # linestyle = np.random.choice(linestyles, 1)[0]
+
+        if curr_method == 'ITL':
+            color = 'black'
+            linestyle = '-'
+        elif curr_method == 'Oracle':
+            color = 'red'
+            linestyle = '-'
+        elif curr_method == 'Aggressive':
+            color = 'tab:blue'
+            linestyle = '-.'
+        elif curr_method == 'Lazy':
+            color = 'tab:green'
+            linestyle = ':'
+        elif curr_method == 'Aggressive_KT':
+            color = 'tab:brown'
+            linestyle = '-.'
+        elif curr_method == 'Lazy_KT':
+            color = 'tab:orange'
+            linestyle = ':'
+        elif curr_method == 'Aggressive_SS':
+            color = 'tab:olive'
+            linestyle = '-.'
+        elif curr_method == 'Lazy_SS':
+            color = 'tab:purple'
+            linestyle = ':'
 
         if all(v is None for v in results[curr_method + '_mtl']):
             continue
@@ -83,18 +133,20 @@ def plot_grid(grid, x_range, y_range, name, timestamp):
             r = self.g(value, self.mid, self.vmin, self.vmax, self.s1, self.s2)
             return np.ma.masked_array(r)
 
-    # norm = SqueezedNorm(vmin=np.nanmin(grid[:]), vmax=np.nanmax(grid[:]), mid=3.5, s1=1, s2=1)
-    norm = SqueezedNorm(vmin=2.8, vmax=9, mid=4.5, s1=1, s2=1)
+    norm = SqueezedNorm(vmin=np.nanmin(grid[:]), vmax=np.nanmax(grid[:]), mid=np.nanmedian(grid[:]), s1=0.2, s2=0.2)
+    # norm = SqueezedNorm(vmin=2.8, vmax=9, mid=4.5, s1=1, s2=1)
+    # norm = SqueezedNorm(vmin=3.2, vmax=3.6, mid=3.4, s1=1, s2=1)
     my_dpi = 100
     plt.figure(figsize=(1080 / my_dpi, 1080 / my_dpi), facecolor='white', dpi=my_dpi)
     plt.imshow(grid.T, origin='lower', extent=[np.min(x_range),
                                                np.max(x_range),
                                                np.min(y_range),
                                                np.max(y_range)], interpolation="none",
-               cmap='RdYlGn_r', aspect='auto', norm=norm)
+               cmap='Greens_r', aspect='auto', norm=norm)
+               # cmap='RdYlGn_r', aspect='auto', norm=norm)
     plt.title(name)
-    plt.xlabel('inner step size')
-    plt.ylabel('meta step size')
+    plt.xlabel('inner wealth')
+    plt.ylabel('meta wealth')
     plt.colorbar()
     plt.savefig('grid_' + name + '_' + str(timestamp).replace(':', '') + '.png', format='png')
     plt.close()

@@ -57,7 +57,7 @@ class DataHandler:
             # generating labels and adding noise
             clean_labels = features @ weight_vector
 
-            signal_to_noise_ratio = 10
+            signal_to_noise_ratio = 0.5
             standard_noise = np.random.randn(self.settings.data.n_all_points)
             noise_std = np.sqrt(np.var(clean_labels) / (signal_to_noise_ratio * np.var(standard_noise)))
             noisy_labels = clean_labels + noise_std * standard_noise
