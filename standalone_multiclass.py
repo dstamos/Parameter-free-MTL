@@ -32,32 +32,29 @@ plt.title('blue: parameter-free | red: SGD')
 plt.pause(0.001)
 
 
-def loss(curr_features, curr_labels, weights):
-    n_classes = weights.shape[1]
-    pred_scores = curr_features @ weights
+def loss(x, y, w):
+    pred_scores = x @ w
     indicator_part = np.ones(pred_scores.shape)
-    indicator_part[curr_labels] = 0
+    indicator_part[y] = 0
 
-    true = pred_scores[curr_labels]
-    true = np.tile(true, n_classes)
+    true = pred_scores[y]
+    true = np.tile(true, w.shape[1])
 
     return np.max(indicator_part + pred_scores - true)
 
 
 def subgradient(x, y, w):
     pred_scores = x @ w
-    n_classes = w.shape[1]
 
     indicator_part = np.ones(pred_scores.shape)
     indicator_part[y] = 0
 
     true = pred_scores[y]
-    true = np.tile(true, (1, n_classes))
+    true = np.tile(true, (1, w.shape[1]))
 
     j_star = np.argmax(indicator_part + pred_scores - true)
 
     subgrad = np.zeros(w.shape)
-
     if y != j_star:
         subgrad[:, j_star] = x
         subgrad[:, y] = -x
@@ -119,7 +116,8 @@ for i, curr_point_idx in enumerate(range(n_points)):
 
     # plot stuff
     if i % 100 == 0:
-        line, = plt.plot(pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel(), c='tab:blue', label='parameter-free')
+        line, = plt.plot(pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel(),
+                         c='tab:blue', label='parameter-free')
         plt.xlim(right=n_points)
         plt.xlabel('iterations', fontsize=24, fontweight="normal")
         plt.ylabel('cumulative error', fontsize=24, fontweight="normal")
