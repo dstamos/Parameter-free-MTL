@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import accuracy_score
 # from src.general_functions import l2_unit_ball_projection, subgradient, loss
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -33,26 +34,26 @@ plt.pause(0.001)
 
 
 def loss(x, y, w):
-    pred_scores = x @ w
-    indicator_part = np.ones(pred_scores.shape)
+    scores = x @ w
+    indicator_part = np.ones(scores.shape)
     indicator_part[y] = 0
 
-    true = pred_scores[y]
+    true = scores[y]
     true = np.tile(true, w.shape[1])
 
-    return np.max(indicator_part + pred_scores - true)
+    return np.max(indicator_part + scores - true)
 
 
 def subgradient(x, y, w):
-    pred_scores = x @ w
+    scores = x @ w
 
-    indicator_part = np.ones(pred_scores.shape)
+    indicator_part = np.ones(scores.shape)
     indicator_part[y] = 0
 
-    true = pred_scores[y]
+    true = scores[y]
     true = np.tile(true, (1, w.shape[1]))
 
-    j_star = np.argmax(indicator_part + pred_scores - true)
+    j_star = np.argmax(indicator_part + scores - true)
 
     subgrad = np.zeros(w.shape)
     if y != j_star:
@@ -145,7 +146,8 @@ for curr_point_idx in range(n_points):
     # update inner weight vector
     weights = weights - step_size * full_gradient
 
-line, = plt.plot(pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel(), c='tab:red', label='SGD')
+line, = plt.plot(pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel(),
+                 c='tab:red', label='SGD')
 plt.xlim(right=n_points)
 plt.xlabel('iterations', fontsize=24, fontweight="normal")
 plt.ylabel('cumulative error', fontsize=24, fontweight="normal")
@@ -154,7 +156,6 @@ mypause(0.0001)
 print(labels)
 print(np.argmax(features @ weights, axis=1))
 
-from sklearn.metrics import accuracy_score
 print('')
 print('accuracy: ', accuracy_score(labels, np.argmax(features @ weights, axis=1)))
 
