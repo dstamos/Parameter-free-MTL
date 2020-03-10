@@ -69,10 +69,12 @@ class ParameterFreeFixedBiasVariation:
 
         all_mtl_performances = []
         all_errors = []
+        total_points = 0
         for task_idx, task in enumerate(getattr(data, task_indexes)):
             x = data.features_tr[task]
             y = data.labels_tr[task]
             n_points, n_dims = x.shape
+            total_points = total_points + n_points
 
             wealth_range = [1]
             for idx, wealth in enumerate(wealth_range):
@@ -137,4 +139,4 @@ class ParameterFreeFixedBiasVariation:
 
                 all_mtl_performances.append(curr_test_perf)
 
-        return (task_idx + 1) * [np.nanmean(all_mtl_performances)], n_points * (task_idx + 1) * [np.nanmean(all_errors)]
+        return (task_idx + 1) * [np.nanmean(all_mtl_performances)], total_points * [np.nanmean(all_errors)]
