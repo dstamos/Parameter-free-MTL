@@ -246,7 +246,7 @@ for task_iteration, task in enumerate(range(n_tasks)):
     x = all_features[task]
     y = all_labels[task]
     # initialize the inner parameters
-    n_points, n_dims = x.shape
+    n_points = x.shape[0]
 
     prev_metaparameter = best_metaparameter
 
@@ -256,12 +256,11 @@ for task_iteration, task in enumerate(range(n_tasks)):
 
             all_gradients = []
 
-            curr_untranslated_weights = np.zeros(n_dims)
+            curr_untranslated_weights = np.zeros(dims)
 
             temp_cum_errors = []
-            shuffled_indexes = list(range(n_points))
             # np.random.shuffle(shuffled_indexes)
-            for inner_iteration, curr_point_idx in enumerate(shuffled_indexes):
+            for inner_iteration, curr_point_idx in enumerate(range(n_points)):
                 prev_untranslated_weights = curr_untranslated_weights
 
                 # update inner weight vector
