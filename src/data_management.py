@@ -59,7 +59,7 @@ class DataHandler:
             # generating labels and adding noise
             clean_labels = features @ weight_vector
 
-            signal_to_noise_ratio = 0.5
+            signal_to_noise_ratio = 1
             standard_noise = np.random.randn(self.settings.data.n_all_points)
             noise_std = np.sqrt(np.var(clean_labels) / (signal_to_noise_ratio * np.var(standard_noise)))
             noisy_labels = clean_labels + noise_std * standard_noise
@@ -121,7 +121,8 @@ class DataHandler:
         all_features = [temp['X'][0][i].T for i in range(len(temp['X'][0]))]
         all_labels = temp['Y'][0]
 
-        shuffled_tasks = list(range(len(all_features)))
+        n_tasks = len(all_features)
+        shuffled_tasks = list(range(n_tasks))
         np.random.shuffle(shuffled_tasks)
         for task_idx, task in enumerate(shuffled_tasks):
             # normalizing the inputs
@@ -129,7 +130,6 @@ class DataHandler:
             features = features / norm(features, axis=1, keepdims=True)
 
             labels = all_labels[task].ravel()
-
             n_points = len(labels)
             # split into training and test
             tr_indexes, ts_indexes = train_test_split(np.arange(0, n_points), test_size=self.settings.data.ts_points_pct)

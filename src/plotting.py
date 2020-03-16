@@ -2,11 +2,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import datetime
 import matplotlib
-matplotlib.use('Agg')
+
+# matplotlib.use('Agg')
 
 
 def plot_stuff(results, methods):
-
     linestyles = ['-', ':', '--', '-.']
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'black',
               'crimson', 'red', 'green', 'blue']
@@ -14,7 +14,8 @@ def plot_stuff(results, methods):
     my_dpi = 100
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
-    plt.ylim(bottom=11, top=15)
+    # plt.ylim(bottom=8, top=12)
+    plt.ylim(bottom=9, top=16)
     for idx, curr_method in enumerate(methods):
         # color = colors[idx]
         # linestyle = np.random.choice(linestyles, 1)[0]
@@ -62,7 +63,8 @@ def plot_stuff(results, methods):
     my_dpi = 100
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
-    plt.ylim(bottom=11, top=15)
+    # plt.ylim(bottom=8, top=12)
+    plt.ylim(bottom=9, top=16)
     for idx, curr_method in enumerate(methods):
 
         # color = colors[idx]
@@ -134,8 +136,6 @@ def plot_grid(grid, x_range, y_range, name, timestamp):
             return np.ma.masked_array(r)
 
     norm = SqueezedNorm(vmin=np.nanmin(grid[:]), vmax=np.nanmax(grid[:]), mid=np.nanmedian(grid[:]), s1=0.2, s2=0.2)
-    # norm = SqueezedNorm(vmin=2.8, vmax=9, mid=4.5, s1=1, s2=1)
-    # norm = SqueezedNorm(vmin=3.2, vmax=3.6, mid=3.4, s1=1, s2=1)
     my_dpi = 100
     plt.figure(figsize=(1080 / my_dpi, 1080 / my_dpi), facecolor='white', dpi=my_dpi)
     plt.imshow(grid.T, origin='lower', extent=[np.min(x_range),
@@ -143,7 +143,6 @@ def plot_grid(grid, x_range, y_range, name, timestamp):
                                                np.min(y_range),
                                                np.max(y_range)], interpolation="none",
                cmap='Greens_r', aspect='auto', norm=norm)
-               # cmap='RdYlGn_r', aspect='auto', norm=norm)
     plt.title(name)
     plt.xlabel('inner wealth')
     plt.ylabel('meta wealth')

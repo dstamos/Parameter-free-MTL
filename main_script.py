@@ -34,7 +34,7 @@ def main():
                             'verbose': 1}
 
         # data_settings = {'dataset': 'synthetic-regression',
-        #                  'n_tr_tasks': 400,
+        #                  'n_tr_tasks': 1000,
         #                  'n_val_tasks': 20,
         #                  'n_test_tasks': 50,
         #                  'n_all_points': 40,

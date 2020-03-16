@@ -25,6 +25,7 @@ class ParameterFreeLazyClassic:
 
         total_iter = 0
         all_meta_parameters = []
+        all_final_weight_vectors = []
         for task_iteration, task in enumerate(data.tr_task_indexes):
             x = data.features_tr[task]
             y = data.labels_tr[task]
@@ -108,13 +109,14 @@ class ParameterFreeLazyClassic:
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
+            all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
             all_test_errors = []
-            for curr_test_task in data.tr_task_indexes[:task_iteration]:
-                all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute'))
-                best_mtl_performances.append(np.nanmean(all_test_errors))
+            for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
+            best_mtl_performances.append(np.nanmean(all_test_errors))
 
         self.all_meta_parameters = all_meta_parameters
-        return None, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
+        return best_mtl_performances, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
 
 
 class ParameterFreeLazyVariation:
@@ -140,6 +142,7 @@ class ParameterFreeLazyVariation:
 
         total_iter = 0
         all_meta_parameters = []
+        all_final_weight_vectors = []
         for task_iteration, task in enumerate(data.tr_task_indexes):
             x = data.features_tr[task]
             y = data.labels_tr[task]
@@ -233,8 +236,12 @@ class ParameterFreeLazyVariation:
             # update meta-magnitude
             curr_meta_magnitude = curr_meta_magnitude_betting_fraction * curr_meta_magnitude_wealth
 
-            curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-            best_mtl_performances.append(curr_test_perf)
+            all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
+            all_test_errors = []
+            for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
+            best_mtl_performances.append(np.nanmean(all_test_errors))
+
 
         self.all_meta_parameters = all_meta_parameters
-        return None, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
+        return best_mtl_performances, pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()

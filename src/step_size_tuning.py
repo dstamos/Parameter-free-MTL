@@ -6,8 +6,8 @@ import matplotlib.pyplot as plt
 
 class ParameterFreeAggressiveVariationStepSearch:
     def __init__(self):
-        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
-        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
+        self.inner_step_size_range = [10 ** i for i in np.linspace(-6, 4, 20)]
+        self.meta_step_size_range = [10 ** i for i in np.linspace(-6, 4, 20)]
 
     def fit(self, data):
 
@@ -67,9 +67,10 @@ class ParameterFreeAggressiveVariationStepSearch:
                     best_perf = average_stuff[-1]
                     best_mtl_performances = all_mtl_performances
                     best_average = average_stuff
-                    print('inner step: %8e | meta step: %8e |       perf: %10.3f' % (inner_step_size, meta_step_size, np.nanmean(all_individual_cum_errors)))
+                    # print('inner step: %8e | meta step: %8e |       perf: %10.3f' % (inner_step_size, meta_step_size, np.nanmean(all_individual_cum_errors)))
                 else:
-                    print('inner step: %8e | meta step: %8e | perf: %10.3f' % (inner_step_size, meta_step_size, np.nanmean(all_individual_cum_errors)))
+                    pass
+                    # print('inner step: %8e | meta step: %8e | perf: %10.3f' % (inner_step_size, meta_step_size, np.nanmean(all_individual_cum_errors)))
         return best_mtl_performances, best_average
 
     @staticmethod
@@ -79,8 +80,8 @@ class ParameterFreeAggressiveVariationStepSearch:
 
 class ParameterFreeLazyVariationStepSearch:
     def __init__(self):
-        self.inner_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
-        self.meta_step_size_range = [10 ** i for i in np.linspace(-3, 4, 10)]
+        self.inner_step_size_range = [10 ** i for i in np.linspace(-6, 4, 20)]
+        self.meta_step_size_range = [10 ** i for i in np.linspace(-6, 4, 20)]
 
     def fit(self, data):
 
@@ -88,7 +89,8 @@ class ParameterFreeLazyVariationStepSearch:
         for _, inner_step_size in enumerate(self.inner_step_size_range):
             for _, meta_step_size in enumerate(self.meta_step_size_range):
                 all_individual_cum_errors = []
-                best_mtl_performances = []
+                all_mtl_performances = []
+                all_final_weight_vectors = []
 
                 curr_metaparameter = np.zeros(data.features_tr[0].shape[1])
                 for task_iteration, task in enumerate(data.tr_task_indexes):
@@ -127,11 +129,14 @@ class ParameterFreeLazyVariationStepSearch:
                         # update the untranslated weights
                         curr_untranslated_weights = prev_untranslated_weights - inner_step_size * full_gradient
 
-                    curr_test_perf = loss(data.features_ts[task], data.labels_ts[task], np.mean(temp_weight_vectors, axis=0), loss_name='absolute')
-                    best_mtl_performances.append(curr_test_perf)
-
                     # update metaparameters
                     curr_metaparameter = prev_metaparameter - meta_step_size * np.sum(all_gradients, axis=0)
+
+                    all_final_weight_vectors.append(np.mean(temp_weight_vectors, axis=0))
+                    all_test_errors = []
+                    for idx, curr_test_task in enumerate(data.tr_task_indexes[:task_iteration]):
+                        all_test_errors.append(loss(data.features_ts[curr_test_task], data.labels_ts[curr_test_task], all_final_weight_vectors[idx], loss_name='absolute'))
+                    all_mtl_performances.append(np.nanmean(all_test_errors))
 
                 average_stuff = pd.DataFrame(all_individual_cum_errors).rolling(window=10 ** 10, min_periods=1).mean().values.ravel()
                 if average_stuff[-1] < best_perf:
@@ -139,10 +144,11 @@ class ParameterFreeLazyVariationStepSearch:
                     best_inner = inner_step_size
                     best_meta = meta_step_size
                     best_average = average_stuff
+                    best_mtl_performances = all_mtl_performances
                 # plt.plot(average_stuff)
                 # plt.title('best inner step ' + str(best_inner) + ' | ' + 'best meta step ' + str(best_meta))
                 # plt.ylim(top=12, bottom=0)
                 # plt.pause(0.1)
                 # k = 1
 
-        return None, best_average
+        return best_mtl_performances, best_average
