@@ -47,7 +47,7 @@ class DataHandler:
             raise ValueError('Invalid dataset')
 
     def synthetic_regression_data_gen(self):
-        self.oracle = 10 * np.ones(self.settings.data.n_dims)
+        self.oracle = 4 * np.ones(self.settings.data.n_dims)
         for task_idx in range(self.settings.data.n_all_tasks):
             # generating and normalizing the inputs
             features = np.random.randn(self.settings.data.n_all_points, self.settings.data.n_dims)
@@ -82,7 +82,7 @@ class DataHandler:
         self.test_task_indexes = np.arange(self.settings.data.n_tr_tasks + self.settings.data.n_val_tasks, self.settings.data.n_all_tasks)
 
     def synthetic_classification_data_gen(self):
-        self.oracle = 10 * np.ones(self.settings.data.n_dims)
+        self.oracle = 4 * np.ones(self.settings.data.n_dims)
         for task_idx in range(self.settings.data.n_all_tasks):
             # generating and normalizing the inputs
             features = np.random.randn(self.settings.data.n_all_points, self.settings.data.n_dims)

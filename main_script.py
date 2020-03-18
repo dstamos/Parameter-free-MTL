@@ -34,12 +34,12 @@ def main():
                             'verbose': 1}
 
         # data_settings = {'dataset': 'synthetic-regression',
-        #                  'n_tr_tasks': 1000,
+        #                  'n_tr_tasks': 400,
         #                  'n_val_tasks': 20,
         #                  'n_test_tasks': 50,
-        #                  'n_all_points': 40,
+        #                  'n_all_points': 10,
         #                  'ts_points_pct': 0.5,
-        #                  'n_dims': 30,
+        #                  'n_dims': 5,
         #                  'noise_std': 0.1}
 
         data_settings = {'dataset': 'schools',
@@ -101,9 +101,20 @@ def main():
 
     plot_stuff(results, methods)
 
-    exit()
+    import os
+    import pickle
+    if not os.path.exists('results'):
+        os.makedirs('results')
+    f = open('results' + '/' + settings.data.dataset + ".pckl", 'wb')
+    pickle.dump(results, f)
+    f.close()
+
+    # results = pickle.load(open('results/' + str(settings.data.dataset) + '.pckl', "rb"))
+
+    # exit()
 
 
 if __name__ == "__main__":
 
     main()
+#
