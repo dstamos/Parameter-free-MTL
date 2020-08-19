@@ -3,10 +3,13 @@ import matplotlib.pyplot as plt
 import datetime
 import matplotlib
 
+font = {'size': 32}
+
+matplotlib.rc('font', **font)
 # matplotlib.use('Agg')
 
 
-def plot_stuff(results, methods):
+def plot_stuff(results, methods, dataset):
     linestyles = ['-', ':', '--', '-.']
     colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan', 'black',
               'crimson', 'red', 'green', 'blue']
@@ -15,7 +18,10 @@ def plot_stuff(results, methods):
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
     # plt.ylim(bottom=8, top=12)
-    plt.ylim(bottom=9, top=16)
+    if dataset == 'synthetic-regression':
+        plt.ylim(bottom=3, top=5.5)
+    if dataset == 'schools':
+        plt.ylim(bottom=9.8, top=18)
     for idx, curr_method in enumerate(methods):
         # color = colors[idx]
         # linestyle = np.random.choice(linestyles, 1)[0]
@@ -48,23 +54,34 @@ def plot_stuff(results, methods):
         mean = np.nanmean(results[curr_method + '_accu'], axis=0)
         std = np.nanstd(results[curr_method + '_accu'], axis=0)
 
-        plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method)
+        if 'Aggressive' in curr_method:
+            plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method.replace('Aggressive', 'Aggr'))
+        else:
+            plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method)
 
         plt.fill_between(range(len(mean)), mean - std, mean + std, alpha=0.1, edgecolor=color, facecolor=color, antialiased=True)
         plt.xlabel('iterations', fontsize=38, fontweight="normal")
         plt.ylabel('cumulative error', fontsize=38, fontweight="normal")
-        plt.legend()
+        plt.xticks(fontsize=36)
+        # plt.legend()
+        if dataset == 'synthetic-regression' and not all(['KT' not in c for c in methods]):
+            plt.legend(prop={'size': 32})
+        else:
+            plt.legend(prop={'size': 46})
+
 
     plt.tight_layout()
-    plt.savefig('temp_accu' + '_' + str(datetime.datetime.now()).replace(':', '') + '.png', format='png')
-    plt.pause(0.01)
+    plt.savefig(dataset + '_accu' + '_' + str(datetime.datetime.now()).replace(':', '') + '.png', format='png')
+    # plt.pause(0.01)
     plt.close()
 
     my_dpi = 100
     plt.figure(figsize=(1664 / my_dpi, 936 / my_dpi), facecolor='white', dpi=my_dpi)
 
     # plt.ylim(bottom=8, top=12)
-    plt.ylim(bottom=9, top=16)
+    # plt.ylim(bottom=9, top=16)
+    if dataset == 'schools':
+        plt.ylim(bottom=9, top=15)
     for idx, curr_method in enumerate(methods):
 
         # color = colors[idx]
@@ -100,17 +117,24 @@ def plot_stuff(results, methods):
         mean = np.nanmean(results[curr_method + '_mtl'], axis=0)
         std = np.nanstd(results[curr_method + '_mtl'], axis=0)
 
-        plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method)
+        if 'Aggressive' in curr_method:
+            plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method.replace('Aggressive', 'Aggr'))
+        else:
+            plt.plot(mean, color=color, linestyle=linestyle, linewidth=2, label=curr_method)
 
         plt.fill_between(range(len(mean)), mean - std, mean + std, alpha=0.1, edgecolor=color, facecolor=color, antialiased=True)
         plt.xlabel('number of tasks', fontsize=38, fontweight="normal")
         plt.ylabel('test error', fontsize=38, fontweight="normal")
-        plt.legend()
+        # plt.legend()
+        if dataset == 'synthetic-regression' and not all(['KT' not in c for c in methods]):
+            plt.legend(prop={'size': 32})
+        else:
+            plt.legend(prop={'size': 46})
 
     plt.tight_layout()
-    plt.savefig('temp_mtl' + '_' + str(datetime.datetime.now()).replace(':', '') + '.png', format='png')
-    plt.pause(0.01)
-    plt.close()
+    plt.savefig(dataset + '_mtl' + '_' + str(datetime.datetime.now()).replace(':', '') + '.png', format='png')
+    # plt.pause(0.01)
+    # plt.close()
 
 
 def plot_grid(grid, x_range, y_range, name, timestamp):

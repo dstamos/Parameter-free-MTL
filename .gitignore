@@ -2,6 +2,8 @@ backup
 plots
 miniimagenet
 omniglot
+spam
+venv
 .idea
 __pycache__
 *.zip

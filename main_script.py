@@ -14,13 +14,17 @@ def main():
     import matplotlib
     matplotlib.rc('font', **font)
 
+    import pickle
+
+    a = pickle.load(open('presaved_50d_picklefile.dat', "rb"))
+
     # methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT', 'Aggressive_SS', 'Lazy_SS']
     # methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT']
     # methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy']
 
     # methods = ['ITL', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT', 'Aggressive_SS', 'Lazy_SS']
-    # methods = ['ITL', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT']
-    methods = ['ITL', 'Aggressive', 'Lazy']
+    methods = ['ITL', 'Oracle', 'Aggressive', 'Lazy', 'Aggressive_KT', 'Lazy_KT']
+    # methods = ['ITL', 'Aggressive', 'Lazy']
 
     results = {}
     for curr_method in methods:
@@ -28,10 +32,19 @@ def main():
         results[curr_method + '_accu'] = []
 
     tt = time.time()
-    for seed in range(10):
+    for seed in range(30):
         np.random.seed(seed)
         general_settings = {'seed': seed,
                             'verbose': 1}
+
+        data_settings = {'dataset': 'synthetic-regression',
+                         'n_tr_tasks': 400,
+                         'n_val_tasks': 20,
+                         'n_test_tasks': 50,
+                         'n_all_points': 50,
+                         'ts_points_pct': 0.5,
+                         'n_dims': 10,
+                         'noise_std': 1}
 
         # data_settings = {'dataset': 'synthetic-regression',
         #                  'n_tr_tasks': 400,
@@ -40,14 +53,21 @@ def main():
         #                  'n_all_points': 10,
         #                  'ts_points_pct': 0.5,
         #                  'n_dims': 5,
-        #                  'noise_std': 0.1}
+        #                  'noise_std': 1}
 
-        data_settings = {'dataset': 'schools',
-                         'n_tr_tasks': 139,
-                         'n_val_tasks': 0,
-                         'n_test_tasks': 0,
-                         'ts_points_pct': 0.25
-                         }
+        # data_settings = {'dataset': 'schools',
+        #                  'n_tr_tasks': 139,
+        #                  'n_val_tasks': 0,
+        #                  'n_test_tasks': 0,
+        #                  'ts_points_pct': 0.25
+        #                  }
+
+        # data_settings = {'dataset': 'lenk',
+        #                  'n_tr_tasks': 180,
+        #                  'n_val_tasks': 0,
+        #                  'n_test_tasks': 0,
+        #                  'ts_points_pct': 0.20
+        #                  }
 
         settings = Settings(data_settings, 'data')
         settings.add_settings(general_settings)
@@ -99,15 +119,15 @@ def main():
             print('%s done %5.2f' % (curr_method, time.time() - tt))
         print('seed: %d | %5.2f sec' % (seed, time.time() - tt))
 
-    plot_stuff(results, methods)
+        import os
+        import pickle
+        if not os.path.exists('results'):
+            os.makedirs('results')
+        f = open('results' + '/' + settings.data.dataset + ".pckl", 'wb')
+        pickle.dump(results, f)
+        f.close()
 
-    import os
-    import pickle
-    if not os.path.exists('results'):
-        os.makedirs('results')
-    f = open('results' + '/' + settings.data.dataset + ".pckl", 'wb')
-    pickle.dump(results, f)
-    f.close()
+    plot_stuff(results, methods, settings.data.dataset)
 
     # results = pickle.load(open('results/' + str(settings.data.dataset) + '.pckl', "rb"))
 

@@ -43,6 +43,8 @@ class DataHandler:
             self.synthetic_classification_data_gen()
         elif self.settings.data.dataset == 'schools':
             self.schools_data_gen()
+        elif self.settings.data.dataset == 'lenk':
+            self.lenk_data_gen()
         else:
             raise ValueError('Invalid dataset')
 
@@ -120,6 +122,59 @@ class DataHandler:
         temp = sio.loadmat('data/schoolData.mat')
         all_features = [temp['X'][0][i].T for i in range(len(temp['X'][0]))]
         all_labels = temp['Y'][0]
+
+        n_tasks = len(all_features)
+        shuffled_tasks = list(range(n_tasks))
+        np.random.shuffle(shuffled_tasks)
+        for task_idx, task in enumerate(shuffled_tasks):
+            # normalizing the inputs
+            features = all_features[task]
+            features = features / norm(features, axis=1, keepdims=True)
+
+            labels = all_labels[task].ravel()
+            n_points = len(labels)
+            # split into training and test
+            tr_indexes, ts_indexes = train_test_split(np.arange(0, n_points), test_size=self.settings.data.ts_points_pct)
+            features_tr = features[tr_indexes]
+            labels_tr = labels[tr_indexes]
+
+            features_ts = features[ts_indexes]
+            labels_ts = labels[ts_indexes]
+
+            self.features_tr[task_idx] = features_tr
+            self.features_ts[task_idx] = features_ts
+            self.labels_tr[task_idx] = labels_tr
+            self.labels_ts[task_idx] = labels_ts
+
+        self.tr_task_indexes = np.arange(0, self.settings.data.n_tr_tasks)
+        self.val_task_indexes = np.arange(self.settings.data.n_tr_tasks, self.settings.data.n_tr_tasks + self.settings.data.n_val_tasks)
+        self.test_task_indexes = np.arange(self.settings.data.n_tr_tasks + self.settings.data.n_val_tasks, self.settings.data.n_all_tasks)
+
+    def lenk_data_gen(self):
+        # temp = sio.loadmat('data/lenk_data.mat')
+        # traindata = temp['Traindata']
+        # testdata = temp['Testdata']
+        #
+        # all_features = [None] * 180
+        # all_labels = [None] * 180
+        #
+        # train_counter = 0
+        # test_counter = 0
+        # for task in range(180):
+        #     all_features[task] = traindata[train_counter:train_counter + 16, :14]
+        #     all_features[task] = np.concatenate((all_features[task], testdata[test_counter:test_counter + 4, :14]))
+        #
+        #     all_labels[task] = traindata[train_counter:train_counter + 16, 14]
+        #     all_labels[task] = np.concatenate((all_labels[task], testdata[test_counter:test_counter + 4, 14]))
+        #
+        #     train_counter = train_counter + 16
+        #     test_counter = test_counter + 4
+        #
+        # import pickle
+        # pickle.dump([all_features, all_labels], open('lenk.pckl', "wb"))
+
+        import pickle
+        all_features, all_labels = pickle.load(open('data/lenk.pckl', "rb"))
 
         n_tasks = len(all_features)
         shuffled_tasks = list(range(n_tasks))
